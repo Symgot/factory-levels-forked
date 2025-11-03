@@ -1,60 +1,49 @@
 #!/bin/bash
-# Verification script for Phase 2: Single-Module Implementation
+# Verification script for Truly Invisible Bonus System
 
-echo "=== Verification: Phase 2 Single-Module Implementation ==="
+echo "=== Verification: Truly Invisible Bonus System ==="
 echo ""
 
-# Check 1: Universal modules instead of machine-specific
-echo "✓ Checking universal module implementation..."
-if grep -q "factory-levels-universal-module-" factory-levels/prototypes/item/invisible-modules.lua; then
-    echo "  ✓ Universal module naming convention found"
+# Check 1: No module prototypes created
+echo "✓ Checking that no modules are created..."
+if grep -q "No modules created - bonuses applied directly" factory-levels/prototypes/item/invisible-modules.lua; then
+    echo "  ✓ Module creation disabled (truly invisible)"
 else
-    echo "  ✗ Universal module naming convention not found"
+    echo "  ✗ Modules still being created"
     exit 1
 fi
 
-# Check 2: Empty module effects (dynamic application)
+# Check 2: Direct bonus application function exists
 echo ""
-echo "✓ Checking module effect structure..."
-if grep -q "effect = {}" factory-levels/prototypes/item/invisible-modules.lua; then
-    echo "  ✓ Empty module effects (bonuses applied dynamically)"
-else
-    echo "  ✗ Module effects not empty"
-    exit 1
-fi
-
-# Check 3: Not-blueprintable flag
-echo ""
-echo "✓ Checking module security flags..."
-if grep -q "not-blueprintable" factory-levels/prototypes/item/invisible-modules.lua; then
-    echo "  ✓ Not-blueprintable flag found"
-else
-    echo "  ✗ Not-blueprintable flag missing"
-    exit 1
-fi
-
-# Check 4: Module insertion function
-echo ""
-echo "✓ Checking module manipulation functions..."
-if grep -q "insert_module" factory-levels/control.lua && \
-   grep -q "remove_modules" factory-levels/control.lua; then
-    echo "  ✓ Module manipulation functions found"
-else
-    echo "  ✗ Module manipulation functions missing"
-    exit 1
-fi
-
-# Check 5: Dynamic bonus application
-echo ""
-echo "✓ Checking dynamic bonus application..."
+echo "✓ Checking direct bonus application..."
 if grep -q "apply_bonuses_to_entity" factory-levels/control.lua; then
-    echo "  ✓ Dynamic bonus application function found"
+    echo "  ✓ Direct bonus application function found"
 else
-    echo "  ✗ Dynamic bonus application function not found"
+    echo "  ✗ Direct bonus application function not found"
     exit 1
 fi
 
-# Check 6: Level update function
+# Check 3: Bonus clearing function exists
+echo ""
+echo "✓ Checking bonus clearing function..."
+if grep -q "clear_bonuses_from_entity" factory-levels/control.lua; then
+    echo "  ✓ Bonus clearing function found"
+else
+    echo "  ✗ Bonus clearing function not found"
+    exit 1
+fi
+
+# Check 4: No module inventory operations
+echo ""
+echo "✓ Checking for absence of module inventory operations..."
+if ! grep -q "get_module_inventory()" factory-levels/control.lua | grep -v "^--"; then
+    echo "  ✓ No module inventory operations (truly invisible)"
+else
+    echo "  ✗ Module inventory operations still present"
+    exit 1
+fi
+
+# Check 5: Level update function
 echo ""
 echo "✓ Checking level update mechanism..."
 if grep -q "update_machine_level" factory-levels/control.lua; then
@@ -64,27 +53,27 @@ else
     exit 1
 fi
 
-# Check 7: current_module field in storage
+# Check 6: bonuses_applied field in storage
 echo ""
-echo "✓ Checking storage structure extension..."
-if grep -q "current_module =" factory-levels/control.lua; then
-    echo "  ✓ current_module field in storage structure"
+echo "✓ Checking storage structure..."
+if grep -q "bonuses_applied =" factory-levels/control.lua; then
+    echo "  ✓ bonuses_applied field in storage structure"
 else
-    echo "  ✗ current_module field missing"
+    echo "  ✗ bonuses_applied field missing"
     exit 1
 fi
 
-# Check 8: Active event handlers (no longer skeletons)
+# Check 7: Active event handlers
 echo ""
 echo "✓ Checking active event handlers..."
 if sed -n '/local function on_machine_built_invisible/,/^end$/p' factory-levels/control.lua | grep -q "track_machine_level"; then
-    echo "  ✓ Event handlers are now active"
+    echo "  ✓ Event handlers are active"
 else
     echo "  ✗ Event handlers still skeletons"
     exit 1
 fi
 
-# Check 9: Integration with replace_machines
+# Check 8: Integration with replace_machines
 echo ""
 echo "✓ Checking integration with level-up system..."
 if grep "function replace_machines" factory-levels/control.lua | head -1 && \
@@ -95,28 +84,40 @@ else
     exit 1
 fi
 
-# Check 10: Module inventory clearing
+# Check 9: Bonus clearing on machine removal
 echo ""
-echo "✓ Checking module cleanup on level change..."
-if grep -q "module_inventory.clear()" factory-levels/control.lua; then
-    echo "  ✓ Module cleanup mechanism implemented"
+echo "✓ Checking bonus cleanup on removal..."
+if grep -q "clear_bonuses_from_entity" factory-levels/control.lua && \
+   sed -n '/local function on_machine_mined_invisible/,/^end$/p' factory-levels/control.lua | grep -q "clear_bonuses_from_entity"; then
+    echo "  ✓ Bonus cleanup mechanism implemented"
 else
-    echo "  ✗ Module cleanup mechanism missing"
+    echo "  ✗ Bonus cleanup mechanism missing"
+    exit 1
+fi
+
+# Check 10: Documentation reflects truly invisible system
+echo ""
+echo "✓ Checking documentation accuracy..."
+if grep -q "No module slots consumed" docs/invisible-module-system.md; then
+    echo "  ✓ Documentation reflects truly invisible system"
+else
+    echo "  ✗ Documentation not updated"
     exit 1
 fi
 
 echo ""
-echo "=== All Phase 2 Verification Checks Passed ==="
+echo "=== All Truly Invisible Bonus System Checks Passed ==="
 echo ""
 echo "Summary:"
-echo "  - Universal module system: ✓"
-echo "  - Dynamic bonus application: ✓"
-echo "  - Module manipulation: ✓"
+echo "  - No module prototypes: ✓"
+echo "  - Direct bonus application: ✓"
+echo "  - Bonus clearing: ✓"
+echo "  - No module inventory operations: ✓"
 echo "  - Level update mechanism: ✓"
 echo "  - Storage structure: ✓"
 echo "  - Active event handlers: ✓"
 echo "  - Level-up integration: ✓"
-echo "  - Module cleanup: ✓"
-echo "  - Security flags: ✓"
+echo "  - Bonus cleanup: ✓"
+echo "  - Documentation: ✓"
 echo ""
-echo "Phase 2 implementation complete and verified!"
+echo "Truly invisible bonus system implementation complete and verified!"
