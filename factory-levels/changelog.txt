@@ -1,0 +1,95 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.7.18
+Date: 2025-03-22
+  New Features:
+    - Add Gleba Reborn Support
+    - Add Extended Vanilla Refining Support
+---------------------------------------------------------------------------------------------------
+Version: 0.7.17
+Date: 2025-03-22
+  Bugfix:
+    - Fix Omnimatter Quality
+---------------------------------------------------------------------------------------------------
+Version: 0.7.16
+Date: 2024-11-28
+  New features:
+    - Biochamber leveling
+  Changes:
+    - Adjust deletion of item-on-ground when replacing entities due to biochamber bounding box
+---------------------------------------------------------------------------------------------------
+Version: 0.7.15
+Date: 2024-11-03
+  Bugfix:
+    - Respect mirroring when upgrading Factories
+---------------------------------------------------------------------------------------------------
+Version: 0.7.14
+Date: 2024-11-03
+  New features:
+    - Added Electromagnetic Plant from Space Age
+---------------------------------------------------------------------------------------------------
+Version: 0.7.13
+Date: 2024-11-03
+  New features:
+    - Remove unused code
+---------------------------------------------------------------------------------------------------
+Version: 0.7.12
+Date: 2024-11-02
+  New features:
+    - Add recycler leveling (enabled by mod startup setting)
+---------------------------------------------------------------------------------------------------
+Version: 0.7.10
+Date: 2024-10-25
+  Bugfix:
+    - Fix changelog
+---------------------------------------------------------------------------------------------------
+Version: 0.7.9
+Date: 2024-10-25
+  Changes:
+    - Hide leveled items in factoriopedia
+---------------------------------------------------------------------------------------------------
+Version: 0.7.8
+  Changes:
+    - Upgrading assemblers now preserves their quality and their recipe quality
+---------------------------------------------------------------------------------------------------
+Version: 0.7.7
+  Changes:
+    - Fix bug with inventories
+---------------------------------------------------------------------------------------------------
+Version: 0.7.6
+  Changes:
+    - Fix bug with inventories
+---------------------------------------------------------------------------------------------------
+Version: 0.7.6
+  Changes:
+    - Fix Module Slot count logic (used deprecated variables)
+---------------------------------------------------------------------------------------------------
+Version: 0.7.5
+Date: 2024-10-23
+  Changes:
+    - Leveled Factories can now increase qualty (if configured in settings, default = true)
+---------------------------------------------------------------------------------------------------
+Version: 0.7.4
+Date: 2024-10-22
+  Changes:
+    - Hide leveled factories in interface (hidden = true)
+---------------------------------------------------------------------------------------------------
+Version: 0.7.3
+Date: 2024-10-22
+  Changes:
+    - Fix quality modules in assemblers
+---------------------------------------------------------------------------------------------------
+Version: 0.7.2
+Date: 2024-10-22
+  Changes:
+    - Fix missing productivity bonus on leveled entities
+    - Disable modules request workaround for now because of crash
+---------------------------------------------------------------------------------------------------
+Version: 0.7.1
+Date: 2024-10-21
+  Changes:
+    - Fix issue with Space Age, Space Age has different crafting categories on assemblers
+---------------------------------------------------------------------------------------------------
+Version: 0.7.0
+Date: 2024-10-21
+  Changes:
+    - Compatibility with Factiorio 2.0
