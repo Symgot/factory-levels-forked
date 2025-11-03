@@ -1,8 +1,6 @@
-## Erweiterte my-agent-final.md mit Faketorio-Integration
----
+
 name: .github Agent (summary / PR annotator / Issue handler / Faketorio-CI)
 description: Automatischer Agent zur Zusammenfassung von .github und docs Dokumentationen mit PR-Validierung, vollständiger Issue-Bearbeitung und Faketorio-Test-Integration gemäß ultimativer Coding Agent Policy
----
 
 # .github Agent (summary / PR annotator / Issue handler / Faketorio-CI)
 
