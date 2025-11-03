@@ -34,7 +34,12 @@ local function calculate_bonuses(level)
 	return bonuses
 end
 
--- Apply bonuses dynamically via entity effect receiver (truly invisible, no module slots used)
+-- Get module name for a given level
+local function get_module_name(level)
+	return "factory-levels-universal-module-" .. level
+end
+
+-- Apply bonuses dynamically via entity effect receiver
 local function apply_bonuses_to_entity(entity, level)
 	if not entity or not entity.valid then
 		return false
@@ -54,23 +59,42 @@ local function apply_bonuses_to_entity(entity, level)
 	return true
 end
 
--- Clear bonuses from entity (reset to zero)
-local function clear_bonuses_from_entity(entity)
+-- Insert module into entity
+local function insert_module(entity, level)
+	if not entity or not entity.valid then
+		return false
+	end
+	
+	local module_inventory = entity.get_module_inventory()
+	if not module_inventory then
+		return false
+	end
+	
+	local module_name = get_module_name(level)
+	
+	if game.item_prototypes[module_name] then
+		module_inventory.clear()
+		module_inventory.insert({name = module_name, count = 1})
+		apply_bonuses_to_entity(entity, level)
+		return true
+	end
+	
+	return false
+end
+
+-- Remove all modules from entity
+local function remove_modules(entity)
 	if not entity or not entity.valid then
 		return
 	end
 	
-	if not entity.effects then
-		return
-	end
-	
-	local effects = entity.effects
-	for bonus_type, _ in pairs(bonus_formulas) do
-		effects[bonus_type] = 0
+	local module_inventory = entity.get_module_inventory()
+	if module_inventory then
+		module_inventory.clear()
 	end
 end
 
--- Track machine level with direct bonus application (no modules used)
+-- Track machine level with module application
 local function track_machine_level(entity, level)
 	if not settings.startup["factory-levels-use-invisible-modules"].value then
 		return
@@ -80,13 +104,13 @@ local function track_machine_level(entity, level)
 		return
 	end
 	
-	local bonuses_applied = apply_bonuses_to_entity(entity, level)
+	local module_inserted = insert_module(entity, level)
 	
 	storage.machine_levels[entity.unit_number] = {
 		level = level,
 		bonuses = calculate_bonuses(level),
 		machine_name = entity.name,
-		bonuses_applied = bonuses_applied,
+		current_module = module_inserted and get_module_name(level) or nil,
 		surface_index = entity.surface.index,
 		position = entity.position
 	}
@@ -120,6 +144,7 @@ local function update_machine_level(entity, new_level)
 		return false
 	end
 	
+	remove_modules(entity)
 	track_machine_level(entity, new_level)
 	
 	return true
@@ -154,7 +179,7 @@ local function on_machine_built_invisible(entity)
 	track_machine_level(entity, 1)
 end
 
--- Event handler for machine mined (now active with direct bonus clearing)
+-- Event handler for machine mined (now active)
 local function on_machine_mined_invisible(entity)
 	if not settings.startup["factory-levels-use-invisible-modules"].value then
 		return
@@ -164,7 +189,7 @@ local function on_machine_mined_invisible(entity)
 		return
 	end
 	
-	clear_bonuses_from_entity(entity)
+	remove_modules(entity)
 	untrack_machine_level(entity.unit_number)
 end
 
