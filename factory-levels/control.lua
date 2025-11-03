@@ -7,9 +7,100 @@ local max_level = 1
 local required_items_for_levels = {}
 local current_tick_interval = 6  -- Track current interval for proper cleanup
 
+-- Invisible Module System - Bonus formula lookup table
+local bonus_formulas = {
+	productivity = function(level) return 0.0025 * level end,
+	speed = function(level) return 0.01 * level end,
+	consumption = function(level) return 0.02 * level end,
+	pollution = function(level) return 0.04 * level end,
+	quality = function(level) return 0.002 * level end
+}
+
+-- Initialize invisible module system storage
+local function init_invisible_module_system()
+	if not settings.startup["factory-levels-use-invisible-modules"].value then
+		return
+	end
+	
+	storage.machine_levels = storage.machine_levels or {}
+end
+
+-- Calculate bonuses for a given level
+local function calculate_bonuses(level)
+	local bonuses = {}
+	for bonus_type, formula in pairs(bonus_formulas) do
+		bonuses[bonus_type] = formula(level)
+	end
+	return bonuses
+end
+
+-- Track machine level (no application yet, just tracking)
+local function track_machine_level(entity, level)
+	if not settings.startup["factory-levels-use-invisible-modules"].value then
+		return
+	end
+	
+	if not entity or not entity.valid then
+		return
+	end
+	
+	storage.machine_levels[entity.unit_number] = {
+		level = level,
+		bonuses = calculate_bonuses(level),
+		machine_name = entity.name,
+		surface_index = entity.surface.index,
+		position = entity.position
+	}
+end
+
+-- Remove machine level tracking
+local function untrack_machine_level(unit_number)
+	if not settings.startup["factory-levels-use-invisible-modules"].value then
+		return
+	end
+	
+	if storage.machine_levels then
+		storage.machine_levels[unit_number] = nil
+	end
+end
+
+-- Get current level for a machine
+local function get_machine_level(unit_number)
+	if not settings.startup["factory-levels-use-invisible-modules"].value then
+		return nil
+	end
+	
+	if storage.machine_levels and storage.machine_levels[unit_number] then
+		return storage.machine_levels[unit_number].level
+	end
+	return nil
+end
+
+-- Event handler skeleton for future level updates (currently inactive)
+local function on_machine_built_invisible(entity)
+	if not settings.startup["factory-levels-use-invisible-modules"].value then
+		return
+	end
+	
+	-- Skeleton for future implementation
+	-- Will handle automatic level tracking on machine placement
+end
+
+-- Event handler skeleton for machine mined (currently inactive)
+local function on_machine_mined_invisible(entity)
+	if not settings.startup["factory-levels-use-invisible-modules"].value then
+		return
+	end
+	
+	-- Skeleton for future implementation
+	-- Will handle cleanup of level tracking
+end
+
 script.on_init(function()
 	storage.stored_products_finished_assemblers = { }
 	storage.stored_products_finished_furnaces = { }
+	-- Initialize invisible module system
+	init_invisible_module_system()
 	-- Initialize settings-dependent variables
 	init_settings_variables()
 	get_built_machines()
@@ -17,6 +108,8 @@ script.on_init(function()
 end)
 
 script.on_configuration_changed(function()
+	-- Initialize invisible module system on configuration change
+	init_invisible_module_system()
 	-- Refresh settings-dependent variables after configuration change
 	init_settings_variables()
 	get_built_machines()
@@ -615,6 +708,10 @@ end
 function on_mined_entity(event)
 	if (event.entity ~= nil and event.entity.products_finished ~= nil and event.entity.products_finished > 0) then
 		storage.built_machines[event.entity.unit_number] = nil
+		
+		-- Call invisible module handler (skeleton)
+		on_machine_mined_invisible(event.entity)
+		
 		if event.entity.type == "furnace" then
 			table.insert(storage.stored_products_finished_furnaces, event.entity.products_finished)
 			table.sort(storage.stored_products_finished_furnaces)
@@ -659,6 +756,11 @@ function replace_built_entity(entity, finished_product_count)
 end
 
 function on_built_entity(event)
+	-- Call invisible module handler (skeleton)
+	if event.entity ~= nil then
+		on_machine_built_invisible(event.entity)
+	end
+	
 	if (event.entity ~= nil and event.entity.type == "assembling-machine") then
 		local finished_product_count = table.remove(storage.stored_products_finished_assemblers)
 		replace_built_entity(event.entity, finished_product_count)
