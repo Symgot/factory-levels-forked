@@ -65,11 +65,9 @@ local function clear_bonuses_from_entity(entity)
 	end
 	
 	local effects = entity.effects
-	effects.productivity = 0
-	effects.speed = 0
-	effects.consumption = 0
-	effects.pollution = 0
-	effects.quality = 0
+	for bonus_type, _ in pairs(bonus_formulas) do
+		effects[bonus_type] = 0
+	end
 end
 
 -- Track machine level with direct bonus application (no modules used)

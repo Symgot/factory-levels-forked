@@ -36,7 +36,8 @@ fi
 # Check 4: No module inventory operations
 echo ""
 echo "✓ Checking for absence of module inventory operations..."
-if ! grep -q "get_module_inventory()" factory-levels/control.lua | grep -v "^--"; then
+# First grep finds lines, second filters out comments, if result is empty then pass
+if [ -z "$(grep "get_module_inventory()" factory-levels/control.lua | grep -v '^[[:space:]]*--')" ]; then
     echo "  ✓ No module inventory operations (truly invisible)"
 else
     echo "  ✗ Module inventory operations still present"
