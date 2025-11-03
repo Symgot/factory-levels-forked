@@ -1,137 +1,83 @@
 name: Manual Release
 
-
 on:
-
-  workflow_dispatch:
-
-    inputs:
-
-      tag:
-
-        description: 'Tag name (z. B. v1.2.3)'
-
-        required: true
-
-        default: ''
-
-      release_name:
-
-        description: 'Release-Name (optional)'
-
-        required: false
-
-        default: ''
-
-      body:
-
-        description: 'Release-Notes / Beschreibung (optional)'
-
-        required: false
-
-        default: ''
-
-      prerelease:
-
-        description: 'Markiere als Pre-release'
-
-        required: false
-
-        default: 'false'
-
-      create_tag:
-
-        description: 'Create and push tag if it does not exist (true/false)'
-
-        required: false
-
-        default: 'true'
-
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name (z. B. v1.2.3)'
+        required: true
+        default: ''
+      release_name:
+        description: 'Release-Name (optional)'
+        required: false
+        default: ''
+      body:
+        description: 'Release-Notes / Beschreibung (optional)'
+        required: false
+        default: ''
+      prerelease:
+        description: 'Markiere als Pre-release'
+        required: false
+        default: 'false'
+      create_tag:
+        description: 'Create and push tag if it does not exist (true/false)'
+        required: false
+        default: 'true'
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-  create-release:
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-    runs-on: ubuntu-latest
+      - name: Set variables
+        id: vars
+        run: |
+          echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          echo "RELEASE_NAME=${{ github.event.inputs.release_name }}" >> $GITHUB_OUTPUT
+          echo "BODY=${{ github.event.inputs.body }}" >> $GITHUB_OUTPUT
+          echo "PRERELEASE=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
+          echo "CREATE_TAG=${{ github.event.inputs.create_tag }}" >> $GITHUB_OUTPUT
 
-    permissions:
+      - name: Validate tag format
+        run: |
+          TAG="${{ steps.vars.outputs.TAG }}"
+          if [[ ! $TAG =~ ^v[0-9]+.[0-9]+.[0-9]+.*$ ]]; then
+            echo "::error::Tag format is invalid. Expected format: v1.2.3"
+            exit 1
+          fi
 
-      contents: write  # benötigt um Tags/Release zu erstellen
+      - name: Create tag if missing
+        if: ${{ steps.vars.outputs.CREATE_TAG == 'true' }}
+        run: |
+          TAG="${{ steps.vars.outputs.TAG }}"
+          if git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} existiert bereits"
+          else
+            echo "Erstelle Tag ${TAG} auf aktuellem HEAD"
+            git tag -a "${TAG}" -m "Release ${TAG}"
+            git push origin "refs/tags/${TAG}"
+          fi
 
-    steps:
-
-      - name: Checkout repository
-
-        uses: actions/checkout@v4
-
-        with:
-
-          fetch-depth: 0
-
-
-      - name: Configure git user
-
-        run: |
-
-          git config user.name "github-actions[bot]"
-
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-
-      - name: Set variables
-
-        id: vars
-
-        run: |
-
-          echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-
-          echo "RELEASE_NAME=${{ github.event.inputs.release_name }}" >> $GITHUB_OUTPUT
-
-          echo "BODY=${{ github.event.inputs.body }}" >> $GITHUB_OUTPUT
-
-          echo "PRERELEASE=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
-
-          echo "CREATE_TAG=${{ github.event.inputs.create_tag }}" >> $GITHUB_OUTPUT
-
-
-      - name: Create tag if missing (optional)
-
-        if: ${{ steps.vars.outputs.CREATE_TAG == 'true' }}
-
-        run: |
-
-          TAG="${{ steps.vars.outputs.TAG }}"
-
-          # Prüfe ob Tag bereits existiert
-
-          if git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
-
-            echo "Tag ${TAG} existiert bereits"
-
-          else
-
-            echo "Erstelle Tag ${TAG} auf aktuellem HEAD"
-
-            git tag -a "${TAG}" -m "Release ${TAG}"
-
-            git push origin "refs/tags/${TAG}"
-
-          fi
-
-
-      - name: Create GitHub release
-
-        uses: ncipollo/release-action@v1
-
-        with:
-
-          tag: ${{ steps.vars.outputs.TAG }}
-
-          name: ${{ steps.vars.outputs.RELEASE_NAME }}
-
-          body: ${{ steps.vars.outputs.BODY }}
-
-          draft: false
-
-          prerelease: ${{ steps.vars.outputs.PRERELEASE }}
+      - name: Create GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.vars.outputs.TAG }}
+          name: ${{ steps.vars.outputs.RELEASE_NAME }}
+          body: ${{ steps.vars.outputs.BODY }}
+          draft: false
+          prerelease: ${{ steps.vars.outputs.PRERELEASE }}
+          token: ${{ secrets.GITHUB_TOKEN }}
