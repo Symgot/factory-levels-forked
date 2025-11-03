@@ -1,4 +1,20 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.7.19
+Date: 2025-11-03
+  New Features:
+    - Added comprehensive advanced mod settings for better customization
+    - Configurable maximum levels for different machine tiers (Tier 1: 25, Tier 2: 50, Tier 3: 100)
+    - Configurable performance settings: check interval (default: 6 ticks) and machines per check (default: 100)
+    - Configurable base requirement for level calculations (default: 1)
+    - Debug mode setting to show level requirement messages
+    - Machine type specific enable/disable settings for assemblers, furnaces, and refineries
+    - Added German and English localization for all new settings
+  Changes:
+    - Replaced hardcoded values with runtime-configurable settings
+    - Improved performance tuning capabilities
+    - Enhanced debugging capabilities for troubleshooting
+    - Better mod compatibility through selective machine type enabling
+---------------------------------------------------------------------------------------------------
 Version: 0.7.18
 Date: 2025-03-22
   New Features:
