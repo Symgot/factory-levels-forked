@@ -156,5 +156,14 @@ data:extend({
         order = "l3",
         setting_type = "startup",
         default_value = true
+    },
+
+    -- Invisible Module System (Parallel Infrastructure)
+    {
+        type = "bool-setting",
+        name = "factory-levels-use-invisible-modules",
+        order = "m1",
+        setting_type = "startup",
+        default_value = false
     }
 })
