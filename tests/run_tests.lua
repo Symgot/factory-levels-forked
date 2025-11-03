@@ -34,7 +34,7 @@ local function test_module_slot_bonus_nil_handling()
 		return module_slots
 	end
 	
-	-- Test verschiedene Maschinentypen
+	-- Test various machine types
 	local test_entities = {
 		{name = "assembling-machine-1", module_specification = {module_slots = 2}},
 		{name = "stone-furnace", module_specification = nil},
