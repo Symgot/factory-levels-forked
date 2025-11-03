@@ -1,14 +1,41 @@
 require("util")
 
+-- Forward declarations
+local machines
+local exponent
+local max_level = 1
+local required_items_for_levels = {}
+local current_tick_interval = 6  -- Track current interval for proper cleanup
+
 script.on_init(function()
 	storage.stored_products_finished_assemblers = { }
 	storage.stored_products_finished_furnaces = { }
+	-- Initialize settings-dependent variables
+	init_settings_variables()
 	get_built_machines()
+	setup_tick_handler()
 end)
 
 script.on_configuration_changed(function()
+	-- Refresh settings-dependent variables after configuration change
+	init_settings_variables()
 	get_built_machines()
+	setup_tick_handler()
 end)
+
+script.on_load(function()
+	-- Re-setup tick handler on load
+	if storage.built_machines then
+		setup_tick_handler()
+	end
+end)
+
+function init_settings_variables()
+	-- Initialize all settings-dependent variables here where settings are available
+	machines = get_machines_table()
+	exponent = settings.global["factory-levels-exponent"].value
+	update_machine_levels(true)
+end
 
 function get_built_machines()
 	storage.built_machines = storage.built_machines or {}
@@ -30,9 +57,6 @@ function get_built_machines()
 	end
 	replace_machines(built_assemblers)
 end
-
-script.on_load(function()
-end)
 
 function string_starts_with(str, start)
 	return str:sub(1, #start) == start
@@ -80,33 +104,33 @@ function get_machine_max_level(machine_name)
 end
 
 function get_machines_table()
-	local machines = {}
+	local machines_table = {}
 	
 	-- Only add assembler machines if assembler leveling is enabled
 	if settings.startup["factory-levels-enable-assembler-leveling"].value then
-		machines["assembling-machine-1"] = {
+		machines_table["assembling-machine-1"] = {
 			name = "assembling-machine-1",
 			level_name = "assembling-machine-1-level-",
 			max_level = get_machine_max_level("assembling-machine-1"),
 			next_machine = "assembling-machine-2"
 		}
-		machines["assembling-machine-2"] = {
+		machines_table["assembling-machine-2"] = {
 			name = "assembling-machine-2",
 			level_name = "assembling-machine-2-level-",
 			max_level = get_machine_max_level("assembling-machine-2"),
 			next_machine = "assembling-machine-3"
 		}
-		machines["assembling-machine-3"] = {
+		machines_table["assembling-machine-3"] = {
 			name = "assembling-machine-3",
 			level_name = "assembling-machine-3-level-",
 			max_level = get_machine_max_level("assembling-machine-3")
 		}
-		machines["electromagnetic-plant"] = {
+		machines_table["electromagnetic-plant"] = {
 			name = "electromagnetic-plant",
 			level_name = "electromagnetic-plant-level-",
 			max_level = get_machine_max_level("electromagnetic-plant")
 		}
-		machines["biochamber"] = {
+		machines_table["biochamber"] = {
 			name = "biochamber",
 			level_name = "biochamber-level-",
 			max_level = get_machine_max_level("biochamber")
@@ -115,42 +139,42 @@ function get_machines_table()
 	
 	-- Only add furnace machines if furnace leveling is enabled
 	if settings.startup["factory-levels-enable-furnace-leveling"].value then
-		machines["stone-furnace"] = {
+		machines_table["stone-furnace"] = {
 			name = "stone-furnace",
 			level_name = "stone-furnace-level-",
 			max_level = get_machine_max_level("stone-furnace"),
 			next_machine = "steel-furnace"
 		}
-		machines["steel-furnace"] = {
+		machines_table["steel-furnace"] = {
 			name = "steel-furnace",
 			level_name = "steel-furnace-level-",
 			max_level = get_machine_max_level("steel-furnace")
 		}
-		machines["electric-furnace"] = {
+		machines_table["electric-furnace"] = {
 			name = "electric-furnace",
 			level_name = "electric-furnace-level-",
 			max_level = get_machine_max_level("electric-furnace")
 		}
 		
 		-- Electric Furnaces
-		machines["electric-stone-furnace"] = {
+		machines_table["electric-stone-furnace"] = {
 			name = "electric-stone-furnace",
 			level_name = "electric-stone-furnace-level-",
 			max_level = get_machine_max_level("electric-stone-furnace"),
 			next_machine = "electric-steel-furnace"
 		}
-		machines["electric-steel-furnace"] = {
+		machines_table["electric-steel-furnace"] = {
 			name = "electric-steel-furnace",
 			level_name = "electric-steel-furnace-level-",
 			max_level = get_machine_max_level("electric-steel-furnace")
 		}
-		machines["electric-furnace-2"] = {
+		machines_table["electric-furnace-2"] = {
 			name = "electric-furnace-2",
 			level_name = "electric-furnace-2-level-",
 			max_level = get_machine_max_level("electric-furnace-2"),
 			next_machine = "electric-furnace-3"
 		}
-		machines["electric-furnace-3"] = {
+		machines_table["electric-furnace-3"] = {
 			name = "electric-furnace-3",
 			level_name = "electric-furnace-3-level-",
 			max_level = get_machine_max_level("electric-furnace-3")
@@ -159,17 +183,17 @@ function get_machines_table()
 	
 	-- Only add refinery machines if refinery leveling is enabled
 	if settings.startup["factory-levels-enable-refinery-leveling"].value then
-		machines["chemical-plant"] = {
+		machines_table["chemical-plant"] = {
 			name = "chemical-plant",
 			level_name = "chemical-plant-level-",
 			max_level = get_machine_max_level("chemical-plant")
 		}
-		machines["oil-refinery"] = {
+		machines_table["oil-refinery"] = {
 			name = "oil-refinery",
 			level_name = "oil-refinery-level-",
 			max_level = get_machine_max_level("oil-refinery")
 		}
-		machines["centrifuge"] = {
+		machines_table["centrifuge"] = {
 			name = "centrifuge",
 			level_name = "centrifuge-level-",
 			max_level = get_machine_max_level("centrifuge")
@@ -177,158 +201,158 @@ function get_machines_table()
 	end
 	
 	-- Omnimatter machines
-	machines["burner-omnitractor"] = {
+	machines_table["burner-omnitractor"] = {
 		name = "burner-omnitractor",
 		level_name = "burner-omnitractor-level-",
 		max_level = 10  -- Special case - keep original value
 	}
-	machines["omnitractor-1"] = {
+	machines_table["omnitractor-1"] = {
 		name = "omnitractor-1",
 		level_name = "omnitractor-1-level-",
 		max_level = get_machine_max_level("omnitractor-1")
 	}
 	
 	-- Angels Refining machines
-	machines["burner-ore-crusher"] = {
+	machines_table["burner-ore-crusher"] = {
 		name = "burner-ore-crusher",
 		level_name = "burner-ore-crusher-level-",
 		max_level = get_machine_max_level("burner-ore-crusher"),
 		next_machine = "ore-crusher"
 	}
-	machines["ore-crusher"] = {
+	machines_table["ore-crusher"] = {
 		name = "ore-crusher",
 		level_name = "ore-crusher-level-",
 		max_level = get_machine_max_level("ore-crusher"),
 		next_machine = "ore-crusher-2"
 	}
-	machines["ore-crusher-2"] = {
+	machines_table["ore-crusher-2"] = {
 		name = "ore-crusher-2",
 		level_name = "ore-crusher-2-level-",
 		max_level = get_machine_max_level("ore-crusher-2"),
 		next_machine = "ore-crusher-3"
 	}
-	machines["ore-crusher-3"] = {
+	machines_table["ore-crusher-3"] = {
 		name = "ore-crusher-3",
 		level_name = "ore-crusher-3-level-",
 		max_level = get_machine_max_level("ore-crusher-3")
 	}
-	machines["liquifier"] = {
+	machines_table["liquifier"] = {
 		name = "liquifier",
 		level_name = "liquifier-level-",
 		max_level = get_machine_max_level("liquifier"),
 		next_machine = "liquifier-2"
 	}
-	machines["liquifier-2"] = {
+	machines_table["liquifier-2"] = {
 		name = "liquifier-2",
 		level_name = "liquifier-2-level-",
 		max_level = get_machine_max_level("liquifier-2"),
 		next_machine = "liquifier-3"
 	}
-	machines["liquifier-3"] = {
+	machines_table["liquifier-3"] = {
 		name = "liquifier-3",
 		level_name = "liquifier-3-level-",
 		max_level = get_machine_max_level("liquifier-3"),
 		next_machine = "liquifier-4"
 	}
-	machines["liquifier-4"] = {
+	machines_table["liquifier-4"] = {
 		name = "liquifier-4",
 		level_name = "liquifier-4-level-",
 		max_level = get_machine_max_level("liquifier-4")
 	}
-	machines["crystallizer"] = {
+	machines_table["crystallizer"] = {
 		name = "crystallizer",
 		level_name = "crystallizer-level-",
 		max_level = get_machine_max_level("crystallizer"),
 		next_machine = "crystallizer-2"
 	}
-	machines["crystallizer-2"] = {
+	machines_table["crystallizer-2"] = {
 		name = "crystallizer-2",
 		level_name = "crystallizer-2-level-",
 		max_level = get_machine_max_level("crystallizer-2")
 	}
-	machines["angels-electrolyser"] = {
+	machines_table["angels-electrolyser"] = {
 		name = "angels-electrolyser",
 		level_name = "angels-electrolyser-level-",
 		max_level = get_machine_max_level("angels-electrolyser")
 	}
-	machines["angels-electrolyser-2"] = {
+	machines_table["angels-electrolyser-2"] = {
 		name = "angels-electrolyser-2",
 		level_name = "angels-electrolyser-2-level-",
 		max_level = get_machine_max_level("angels-electrolyser-2")
 	}
-	machines["angels-electrolyser-3"] = {
+	machines_table["angels-electrolyser-3"] = {
 		name = "angels-electrolyser-3",
 		level_name = "angels-electrolyser-3-level-",
 		max_level = get_machine_max_level("angels-electrolyser-3")
 	}
-	machines["angels-electrolyser-4"] = {
+	machines_table["angels-electrolyser-4"] = {
 		name = "angels-electrolyser-4",
 		level_name = "angels-electrolyser-4-level-",
 		max_level = get_machine_max_level("angels-electrolyser-4")
 	}
-	machines["algae-farm"] = {
+	machines_table["algae-farm"] = {
 		name = "algae-farm",
 		level_name = "algae-farm-level-",
 		max_level = get_machine_max_level("algae-farm")
 	}
-	machines["algae-farm-2"] = {
+	machines_table["algae-farm-2"] = {
 		name = "algae-farm-2",
 		level_name = "algae-farm-2-level-",
 		max_level = get_machine_max_level("algae-farm-2")
 	}
-	machines["algae-farm-3"] = {
+	machines_table["algae-farm-3"] = {
 		name = "algae-farm-3",
 		level_name = "algae-farm-3-level-",
 		max_level = get_machine_max_level("algae-farm-3")
 	}
-	machines["algae-farm-4"] = {
+	machines_table["algae-farm-4"] = {
 		name = "algae-farm-4",
 		level_name = "algae-farm-4-level-",
 		max_level = get_machine_max_level("algae-farm-4")
 	}
 	
 	-- ev-refining machines
-	machines["crusher1"] = {
+	machines_table["crusher1"] = {
 		name = "crusher1",
 		level_name = "crusher1-level-",
 		max_level = get_machine_max_level("crusher1"),
 		next_machine = "crusher2"
 	}
-	machines["crusher2"] = {
+	machines_table["crusher2"] = {
 		name = "crusher2",
 		level_name = "crusher2-level-",
 		max_level = get_machine_max_level("crusher2"),
 		next_machine = "crusher3"
 	}
-	machines["crusher3"] = {
+	machines_table["crusher3"] = {
 		name = "crusher3",
 		level_name = "crusher3-level-",
 		max_level = get_machine_max_level("crusher3")
 	}
-	machines["echamber1"] = {
+	machines_table["echamber1"] = {
 		name = "echamber1",
 		level_name = "echamber1-level-",
 		max_level = get_machine_max_level("echamber1"),
 		next_machine = "echamber2"
 	}
-	machines["echamber2"] = {
+	machines_table["echamber2"] = {
 		name = "echamber2",
 		level_name = "echamber2-level-",
 		max_level = get_machine_max_level("echamber2"),
 		next_machine = "echamber3"
 	}
-	machines["echamber3"] = {
+	machines_table["echamber3"] = {
 		name = "echamber3",
 		level_name = "echamber3-level-",
 		max_level = get_machine_max_level("echamber3")
 	}
-	machines["pchamber1"] = {
+	machines_table["pchamber1"] = {
 		name = "pchamber1",
 		level_name = "pchamber1-level-",
 		max_level = get_machine_max_level("pchamber1"),
 		next_machine = "pchamber2"
 	}
-	machines["pchamber2"] = {
+	machines_table["pchamber2"] = {
 		name = "pchamber2",
 		level_name = "pchamber2-level-",
 		max_level = get_machine_max_level("pchamber2")
@@ -336,21 +360,16 @@ function get_machines_table()
 	
 	-- Add recycler if enabled
 	if settings.startup["factory-levels-enable-recycler-leveling"].value then
-		machines["recycler"] = {
+		machines_table["recycler"] = {
 			name = "recycler",
 			level_name = "recycler-level-",
 			max_level = get_machine_max_level("recycler")
 		}
 	end
 	
-	return machines
+	return machines_table
 end
 
--- Initialize machines table
-machines = get_machines_table()
-
-exponent = settings.global["factory-levels-exponent"].value
-max_level = 1
 function update_machine_levels(overwrite)
 	if overwrite then
 		max_level = 1    -- Just in case another mod cuts the max level of this mods machines to something like 25.
@@ -415,11 +434,6 @@ remote.add_interface("factory_levels", {
 		return machines[machine_name]
 	end
 })
-
-required_items_for_levels = {
-}
-
-update_machine_levels(true)
 
 function determine_level(finished_products_count)
 	local should_have_level = 1
@@ -566,8 +580,12 @@ end
 -- Use configurable check interval and machines per check
 function setup_tick_handler()
 	local check_interval = settings.global["factory-levels-check-interval"].value
-	-- Remove any existing handler first
-	script.on_nth_tick(nil)
+	-- Remove the current specific handler first, if one exists
+	if current_tick_interval then
+		script.on_nth_tick(current_tick_interval, nil)
+	end
+	current_tick_interval = check_interval
+	
 	-- Set new handler with current interval
 	script.on_nth_tick(check_interval, function(event)
 		local assemblers = {}
@@ -581,7 +599,7 @@ function setup_tick_handler()
 			if storage.current_machine == nil then
 				break
 			end
-			entity = storage.check_machines[storage.current_machine]
+			local entity = storage.check_machines[storage.current_machine]
 
 			if entity and entity.entity and entity.entity.valid then
 				table.insert(assemblers, entity.entity)
@@ -593,9 +611,6 @@ function setup_tick_handler()
 		replace_machines(assemblers)
 	end)
 end
-
--- Initialize tick handler
-setup_tick_handler()
 
 function on_mined_entity(event)
 	if (event.entity ~= nil and event.entity.products_finished ~= nil and event.entity.products_finished > 0) then
