@@ -121,6 +121,7 @@ function factory_levels.get_or_create_machine(machine_type, base_machine_name, l
 		end
 		local machine = table.deepcopy(base_machine)
 		machine.name = new_machine_name
+		table.insert(machine.flags, "not-in-made-in")
 		data:extend({ machine })
 	end
 
@@ -145,7 +146,7 @@ function factory_levels.create_leveled_machines(machines)
 			factory_levels.update_machine_energy_usage(machine, level, machines.base_consumption[tier], machines.consumption_multipliers[tier], machines.consumption_unit[tier])
 			factory_levels.update_machine_pollution(machine, level, machines.base_pollution[tier], machines.pollution_multipliers[tier])
 			factory_levels.update_machine_productivity_quality(machine, level, machines.base_productivity[tier], machines.productivity_multipliers[tier], machines.quality_multipliers[tier])
-			factory_levels.update_machine_module_slots(machine, level, machines.levels_per_module_slots[tier], machines.base_module_slots[tier], machines.bonus_module_slots[tier])
+			factory_levels.update_machine_module_slots(machine, level, machines.levels_per_module_slots[tier], machines.bonus_module_slots[tier])
 			factory_levels.update_machine_tint(machine, level, machines.base_level_tints[tier], machines.level_tint_multipliers[tier])
 
 			if mods["space-age"] and machines.crafting_categories ~= nil then
