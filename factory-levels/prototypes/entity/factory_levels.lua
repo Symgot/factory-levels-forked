@@ -40,7 +40,12 @@ end
 
 function factory_levels.update_machine_module_slots(machine, level, levels_per_module_slot, base_module_slots, module_slot_bonus)
 	if (settings.startup["factory-levels-enable-module-bonus"].value) then
-		machine.module_slots = base_module_slots + (math.floor(level / levels_per_module_slot) * module_slot_bonus)
+		-- Defensive nil-checking for all parameters
+		local safe_base_slots = base_module_slots or 0
+		local safe_bonus = module_slot_bonus or 0
+		local safe_levels_per_slot = levels_per_module_slot or 1
+		
+		machine.module_slots = safe_base_slots + (math.floor(level / safe_levels_per_slot) * safe_bonus)
 
 		if machine.module_slots > 0 then
 			machine.allowed_effects = { "consumption", "speed", "productivity", "pollution", "quality" }
@@ -146,7 +151,7 @@ function factory_levels.create_leveled_machines(machines)
 			factory_levels.update_machine_energy_usage(machine, level, machines.base_consumption[tier], machines.consumption_multipliers[tier], machines.consumption_unit[tier])
 			factory_levels.update_machine_pollution(machine, level, machines.base_pollution[tier], machines.pollution_multipliers[tier])
 			factory_levels.update_machine_productivity_quality(machine, level, machines.base_productivity[tier], machines.productivity_multipliers[tier], machines.quality_multipliers[tier])
-			factory_levels.update_machine_module_slots(machine, level, machines.levels_per_module_slots[tier], machines.bonus_module_slots[tier])
+			factory_levels.update_machine_module_slots(machine, level, machines.levels_per_module_slots[tier], machines.base_module_slots[tier], machines.bonus_module_slots[tier])
 			factory_levels.update_machine_tint(machine, level, machines.base_level_tints[tier], machines.level_tint_multipliers[tier])
 
 			if mods["space-age"] and machines.crafting_categories ~= nil then
