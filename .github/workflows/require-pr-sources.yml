@@ -1,0 +1,53 @@
+name: Require PR Sources
+
+
+on:
+
+  pull_request:
+
+    types: [opened, edited, synchronize]
+
+
+jobs:
+
+  validate-pr-sources:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check PR body for References section
+
+        uses: actions/github-script@v7
+
+        with:
+
+          script: |
+
+            const body = context.payload.pull_request && context.payload.pull_request.body || '';
+
+            const urlRegex = /(https?:\/\/[^\s)]+)/g;
+
+            const hasReferencesHeading = /(^|\n)#+?\s*Quellen\s*\/\s*References/i.test(body) || /(^|\n)Quellen\s*\/\s*References/i.test(body);
+
+            const urls = body.match(urlRegex) || [];
+
+            // require heading and at least one URL with either a commit SHA or a version tag
+
+            const shaRegex = /[0-9a-f]{7,40}/i;
+
+            const tagOrVersionRegex = /v?\d+\.\d+(\.\d+)?/;
+
+            const hasStableRef = urls.some(u => shaRegex.test(u) || tagOrVersionRegex.test(u) || u.includes('lua-api.factorio.com') || u.includes('wiki.factorio.com'));
+
+            if (!hasReferencesHeading || urls.length === 0 || !hasStableRef) {
+
+              core.setFailed('PR body must include a "Quellen / References" section with at least one URL and a stable reference (commit-SHA or version/tag).');
+
+            } else {
+
+              core.info('PR sources check passed.');
+
+            }
+
+---
