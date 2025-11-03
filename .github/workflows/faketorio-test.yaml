@@ -1,0 +1,66 @@
+# .github/workflows/faketorio-tests.yml
+name: Faketorio CI — Run mod tests
+
+on:
+  pull_request:
+    paths:
+      - 'mods/**'
+      - 'tests/**'
+      - '.github/workflows/faketorio-tests.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'mods/**'
+      - 'tests/**'
+      - '.github/workflows/faketorio-tests.yml'
+  workflow_dispatch:  # Ermöglicht manuellen Start
+
+jobs:
+  run-faketorio-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repo (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip curl
+      
+      - name: Ensure faketorio present
+        run: |
+          if [ ! -d vendor/faketorio ]; then
+            echo "vendor/faketorio not found — downloading pinned release"
+            curl -L -o /tmp/faketorio.zip "https://github.com/JonasJurczok/faketorio/archive/refs/heads/main.zip"
+            unzip -q /tmp/faketorio.zip -d vendor
+            mv vendor/faketorio-main vendor/faketorio || true
+          fi
+          ls -la vendor/faketorio || true
+      
+      - name: Run tests with Faketorio
+        run: |
+          set -euo pipefail
+          chmod +x ./vendor/faketorio/bin/faketorio || true
+          ./vendor/faketorio/bin/faketorio --mods "$(pwd)/mods" --script "$(pwd)/tests/run_tests.lua" 2>&1 | tee faketorio.log || true
+          cat faketorio.log
+          if grep -q "ALL TESTS PASSED" faketorio.log; then
+            echo "All tests passed"
+            exit 0
+          else
+            echo "::error::Tests failed"
+            exit 1
+          fi
+      
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: faketorio-logs-${{ github.sha }}
+          path: faketorio.log
