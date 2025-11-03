@@ -52,20 +52,8 @@ local function apply_bonuses_to_entity(entity, level)
 	local bonuses = calculate_bonuses(level)
 	local effects = entity.effects
 	
-	if bonuses.productivity then
-		effects.productivity = bonuses.productivity
-	end
-	if bonuses.speed then
-		effects.speed = bonuses.speed
-	end
-	if bonuses.consumption then
-		effects.consumption = bonuses.consumption
-	end
-	if bonuses.pollution then
-		effects.pollution = bonuses.pollution
-	end
-	if bonuses.quality then
-		effects.quality = bonuses.quality
+	for bonus_type, value in pairs(bonuses) do
+		effects[bonus_type] = value
 	end
 	
 	return true
@@ -124,7 +112,7 @@ local function track_machine_level(entity, level)
 		machine_name = entity.name,
 		current_module = module_inserted and get_module_name(level) or nil,
 		surface_index = entity.surface.index,
-		position = {x = entity.position.x, y = entity.position.y}
+		position = entity.position
 	}
 end
 
@@ -149,7 +137,9 @@ local function update_machine_level(entity, new_level)
 		return false
 	end
 	
-	local old_level = get_machine_level(entity.unit_number)
+	local tracking_data = storage.machine_levels and storage.machine_levels[entity.unit_number]
+	local old_level = tracking_data and tracking_data.level or nil
+	
 	if old_level == new_level then
 		return false
 	end

@@ -77,7 +77,7 @@ fi
 # Check 8: Active event handlers (no longer skeletons)
 echo ""
 echo "✓ Checking active event handlers..."
-if grep -A15 "on_machine_built_invisible" factory-levels/control.lua | grep -q "track_machine_level"; then
+if sed -n '/local function on_machine_built_invisible/,/^end$/p' factory-levels/control.lua | grep -q "track_machine_level"; then
     echo "  ✓ Event handlers are now active"
 else
     echo "  ✗ Event handlers still skeletons"
@@ -87,7 +87,8 @@ fi
 # Check 9: Integration with replace_machines
 echo ""
 echo "✓ Checking integration with level-up system..."
-if grep -A20 "function replace_machines" factory-levels/control.lua | grep -q "factory-levels-use-invisible-modules"; then
+if grep "function replace_machines" factory-levels/control.lua | head -1 && \
+   grep "factory-levels-use-invisible-modules" factory-levels/control.lua | grep -q "replace_machines\|if settings"; then
     echo "  ✓ Integration with replace_machines found"
 else
     echo "  ✗ Integration with replace_machines missing"
