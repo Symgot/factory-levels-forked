@@ -34,7 +34,79 @@ local function calculate_bonuses(level)
 	return bonuses
 end
 
--- Track machine level (no application yet, just tracking)
+-- Get module name for a given level
+local function get_module_name(level)
+	return "factory-levels-universal-module-" .. level
+end
+
+-- Apply bonuses dynamically via entity effect receiver
+local function apply_bonuses_to_entity(entity, level)
+	if not entity or not entity.valid then
+		return false
+	end
+	
+	if not entity.effects then
+		return false
+	end
+	
+	local bonuses = calculate_bonuses(level)
+	local effects = entity.effects
+	
+	if bonuses.productivity then
+		effects.productivity = bonuses.productivity
+	end
+	if bonuses.speed then
+		effects.speed = bonuses.speed
+	end
+	if bonuses.consumption then
+		effects.consumption = bonuses.consumption
+	end
+	if bonuses.pollution then
+		effects.pollution = bonuses.pollution
+	end
+	if bonuses.quality then
+		effects.quality = bonuses.quality
+	end
+	
+	return true
+end
+
+-- Insert module into entity
+local function insert_module(entity, level)
+	if not entity or not entity.valid then
+		return false
+	end
+	
+	local module_inventory = entity.get_module_inventory()
+	if not module_inventory then
+		return false
+	end
+	
+	local module_name = get_module_name(level)
+	
+	if game.item_prototypes[module_name] then
+		module_inventory.clear()
+		module_inventory.insert({name = module_name, count = 1})
+		apply_bonuses_to_entity(entity, level)
+		return true
+	end
+	
+	return false
+end
+
+-- Remove all modules from entity
+local function remove_modules(entity)
+	if not entity or not entity.valid then
+		return
+	end
+	
+	local module_inventory = entity.get_module_inventory()
+	if module_inventory then
+		module_inventory.clear()
+	end
+end
+
+-- Track machine level with module application
 local function track_machine_level(entity, level)
 	if not settings.startup["factory-levels-use-invisible-modules"].value then
 		return
@@ -44,12 +116,15 @@ local function track_machine_level(entity, level)
 		return
 	end
 	
+	local module_inserted = insert_module(entity, level)
+	
 	storage.machine_levels[entity.unit_number] = {
 		level = level,
 		bonuses = calculate_bonuses(level),
 		machine_name = entity.name,
+		current_module = module_inserted and get_module_name(level) or nil,
 		surface_index = entity.surface.index,
-		position = entity.position
+		position = {x = entity.position.x, y = entity.position.y}
 	}
 end
 
@@ -64,6 +139,27 @@ local function untrack_machine_level(unit_number)
 	end
 end
 
+-- Update machine level (for level-up events)
+local function update_machine_level(entity, new_level)
+	if not settings.startup["factory-levels-use-invisible-modules"].value then
+		return false
+	end
+	
+	if not entity or not entity.valid then
+		return false
+	end
+	
+	local old_level = get_machine_level(entity.unit_number)
+	if old_level == new_level then
+		return false
+	end
+	
+	remove_modules(entity)
+	track_machine_level(entity, new_level)
+	
+	return true
+end
+
 -- Get current level for a machine
 local function get_machine_level(unit_number)
 	if not settings.startup["factory-levels-use-invisible-modules"].value then
@@ -76,24 +172,35 @@ local function get_machine_level(unit_number)
 	return nil
 end
 
--- Event handler skeleton for future level updates (currently inactive)
+-- Event handler for machine placement (now active)
 local function on_machine_built_invisible(entity)
 	if not settings.startup["factory-levels-use-invisible-modules"].value then
 		return
 	end
 	
-	-- Skeleton for future implementation
-	-- Will handle automatic level tracking on machine placement
+	if not entity or not entity.valid then
+		return
+	end
+	
+	if entity.type ~= "assembling-machine" and entity.type ~= "furnace" then
+		return
+	end
+	
+	track_machine_level(entity, 1)
 end
 
--- Event handler skeleton for machine mined (currently inactive)
+-- Event handler for machine mined (now active)
 local function on_machine_mined_invisible(entity)
 	if not settings.startup["factory-levels-use-invisible-modules"].value then
 		return
 	end
 	
-	-- Skeleton for future implementation
-	-- Will handle cleanup of level tracking
+	if not entity or not entity.valid then
+		return
+	end
+	
+	remove_modules(entity)
+	untrack_machine_level(entity.unit_number)
 end
 
 script.on_init(function()
@@ -636,27 +743,41 @@ end
 
 function replace_machines(entities)
 	for _, entity in pairs(entities) do
-		local should_have_level = determine_level(entity.products_finished)
-		for _, machine in pairs(machines) do
-			if (entity.name == machine.name and entity.products_finished > 0) then
-				if not settings.global["factory-levels-disable-mod"].value then
-					if not machine.disable_mod_setting or not settings.global[machine.disable_mod_setting].value then
-						upgrade_factory(entity.surface, machine.level_name .. math.min(should_have_level, machine.max_level), entity)
-					end
+		if settings.startup["factory-levels-use-invisible-modules"].value then
+			local should_have_level = determine_level(entity.products_finished)
+			local machine = determine_machine(entity)
+			
+			if machine and entity.products_finished > 0 then
+				local target_level = math.min(should_have_level, machine.max_level)
+				local current_tracked_level = get_machine_level(entity.unit_number)
+				
+				if current_tracked_level ~= target_level then
+					update_machine_level(entity, target_level)
 				end
-				break
-			elseif string_starts_with(entity.name, machine.level_name) then
-				local current_level = tonumber(string.match(entity.name, "%d+$"))
-				if (settings.global["factory-levels-disable-mod"].value) or (machine.disable_mod_setting and settings.global[machine.disable_mod_setting].value) then
-					upgrade_factory(entity.surface, machine.name, entity)
+			end
+		else
+			local should_have_level = determine_level(entity.products_finished)
+			for _, machine in pairs(machines) do
+				if (entity.name == machine.name and entity.products_finished > 0) then
+					if not settings.global["factory-levels-disable-mod"].value then
+						if not machine.disable_mod_setting or not settings.global[machine.disable_mod_setting].value then
+							upgrade_factory(entity.surface, machine.level_name .. math.min(should_have_level, machine.max_level), entity)
+						end
+					end
 					break
-				elseif (should_have_level > current_level and current_level < machine.max_level) then
-					upgrade_factory(entity.surface, machine.level_name .. math.min(should_have_level, machine.max_level), entity)
-					break
-				elseif (should_have_level > current_level and current_level >= machine.max_level and machine.next_machine ~= nil) then
-					local created = upgrade_factory(entity.surface, machine.next_machine, entity)
-					created.products_finished = 0
-					break
+				elseif string_starts_with(entity.name, machine.level_name) then
+					local current_level = tonumber(string.match(entity.name, "%d+$"))
+					if (settings.global["factory-levels-disable-mod"].value) or (machine.disable_mod_setting and settings.global[machine.disable_mod_setting].value) then
+						upgrade_factory(entity.surface, machine.name, entity)
+						break
+					elseif (should_have_level > current_level and current_level < machine.max_level) then
+						upgrade_factory(entity.surface, machine.level_name .. math.min(should_have_level, machine.max_level), entity)
+						break
+					elseif (should_have_level > current_level and current_level >= machine.max_level and machine.next_machine ~= nil) then
+						local created = upgrade_factory(entity.surface, machine.next_machine, entity)
+						created.products_finished = 0
+						break
+					end
 				end
 			end
 		end
@@ -740,17 +861,29 @@ function replace_built_entity(entity, finished_product_count)
 	storage.built_machines[entity.unit_number] = { entity = entity, unit_number = entity.unit_number }
 	local machine = determine_machine(entity)
 
-	if finished_product_count ~= nil then
-		local should_have_level = determine_level(finished_product_count)
-		entity.products_finished = finished_product_count
-
-		if machine ~= nil then
-			local created = upgrade_factory(entity.surface, machine.level_name .. math.min(should_have_level, machine.max_level), entity)
-			created.products_finished = finished_product_count
+	if settings.startup["factory-levels-use-invisible-modules"].value then
+		if finished_product_count ~= nil and finished_product_count > 0 then
+			local should_have_level = determine_level(finished_product_count)
+			entity.products_finished = finished_product_count
+			
+			if machine ~= nil then
+				local target_level = math.min(should_have_level, machine.max_level)
+				track_machine_level(entity, target_level)
+			end
 		end
 	else
-		if machine ~= nil and machine.name ~= entity.name then
-			upgrade_factory(entity.surface, machine.name, entity)
+		if finished_product_count ~= nil then
+			local should_have_level = determine_level(finished_product_count)
+			entity.products_finished = finished_product_count
+
+			if machine ~= nil then
+				local created = upgrade_factory(entity.surface, machine.level_name .. math.min(should_have_level, machine.max_level), entity)
+				created.products_finished = finished_product_count
+			end
+		else
+			if machine ~= nil and machine.name ~= entity.name then
+				upgrade_factory(entity.surface, machine.name, entity)
+			end
 		end
 	end
 end
