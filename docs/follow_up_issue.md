@@ -1,7 +1,3 @@
-# [KRITISCH] Vollständige Factorio 2.0-API-Integration und universelle Test-Suite
-
-Folge-Issue zu #21 (Phase 2) und PR #22. Die aktuellen Testdateien decken nur einen Bruchteil der Factorio-2.0-API ab. Für universelle Mod-Entwicklung müssen alle Klassen, Events, Prototype-Typen und `defines`-Aufzählungen integriert und mit Tests abgedeckt werden. Es fehlt die Unterstützung der Hauptmod sowie der offiziellen Erweiterungen Space Age, Quality und Elevated Rails.
-
 ## Fehlende Klassen
 
 Anzahl fehlender Klassen: 148. Es sind alle folgenden Lua-Klassen einzubinden:
@@ -624,23 +620,3 @@ Anzahl fehlender Werte: 8. Alle folgenden Werte müssen in `defines.flow_precisi
 - ten_minutes
 - two_hundred_fifty_hours
 
-## Anweisungen für Tests
-
-- Grund-Tests (notwendig): Für jede Klasse, jeden Prototypen, jedes Event und jede Enumeration müssen universelle Tests geschrieben werden, die die Funktionalität abdecken. Diese Tests dürfen keine mod-spezifischen Daten erfordern und müssen für jede Mod verwendbar sein.
-
-- Mod-Tests (optional): Zusätzlich zu den Grund-Tests können spezifische Tests für factory-levels und andere Mods hinzugefügt werden. Diese Testdateien gehören nicht zum Grundumfang.
-
-- Für jede Klasse sind alle Methoden und Attribute aufzulisten und mit Beispielaufrufen sowie Fehlerszenarien zu testen.
-
-- Für jedes Event sind alle Parameter und alle möglichen Variationen zu testen.
-
-- Für jeden Prototype-Typ müssen Instanzen erstellt und alle Properties geprüft werden.
-
-- Für jede `defines`-Kategorie müssen alle Werte vorhanden sein und in Tests referenziert werden.
-
-- Die API-Validierung muss für Factorio 2.0.72 stabil sowie für Space Age, Quality und Elevated Rails funktionieren.
-
-
-## Erwartetes Ergebnis
-
-Eine vollständige und universelle Factorio-2.0-API-Integration im Branch `API-Integration`, inklusive aller oben aufgeführten Klassen, Events, Prototype-Typen und `defines`-Werte, sowie ein umfassendes Testpaket, das alle möglichen Szenarien abdeckt und zwischen Grund-Tests und Mod-Tests unterscheidet.
