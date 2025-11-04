@@ -1,0 +1,29 @@
+{
+    "Lua.runtime.version": "Lua 5.3",
+    "Lua.diagnostics.globals": [
+        "storage",
+        "script",
+        "defines",
+        "settings",
+        "game",
+        "remote",
+        "data"
+    ],
+    "Lua.workspace.library": [
+        "${workspaceFolder}/tests"
+    ],
+    "Lua.workspace.checkThirdParty": false,
+    "files.associations": {
+        "*.lua": "lua"
+    },
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/.git": true,
+        "**/target": true,
+        "**/.vscode": false
+    },
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
+}

@@ -4,7 +4,6 @@ target/
 # IDE files
 .idea/
 *.iml
-.vscode/
 *.swp
 *.swo
 *~
@@ -12,3 +11,8 @@ target/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Test artifacts
+tests/*.out
+tests/*.log
+tests/temp_*
