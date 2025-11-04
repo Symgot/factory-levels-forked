@@ -1,0 +1,45 @@
+name: Lua Tests
+
+on:
+  push:
+    branches: [ main, develop, copilot/** ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Lua Tests with LuaUnit
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install Lua 5.3
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lua5.3
+        lua5.3 -v
+        
+    - name: Verify test structure
+      run: |
+        ls -la tests/
+        test -f tests/luaunit.lua || exit 1
+        test -f tests/factorio_mock.lua || exit 1
+        test -f tests/test_control.lua || exit 1
+        test -f tests/test_syntax_all.lua || exit 1
+        
+    - name: Run syntax validation tests
+      run: |
+        cd tests
+        lua5.3 test_control.lua
+        lua5.3 test_syntax_all.lua
+        
+    - name: Test summary
+      if: always()
+      run: |
+        echo "::notice::Lua syntax validation completed"

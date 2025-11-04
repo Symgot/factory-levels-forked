@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Lua Tests",
+            "type": "lua",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/test_control.lua",
+            "cwd": "${workspaceFolder}/tests",
+            "stopOnEntry": false
+        },
+        {
+            "name": "Debug Current Lua File",
+            "type": "lua",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "stopOnEntry": false
+        }
+    ]
+}

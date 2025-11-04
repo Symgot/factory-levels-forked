@@ -1,0 +1,66 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Lua Tests",
+            "type": "shell",
+            "command": "lua5.3",
+            "args": [
+                "tests/test_control.lua"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run All Syntax Tests",
+            "type": "shell",
+            "command": "lua5.3",
+            "args": [
+                "tests/test_syntax_all.lua"
+            ],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Lua Tests (Verbose)",
+            "type": "shell",
+            "command": "lua5.3",
+            "args": [
+                "tests/test_control.lua",
+                "-v"
+            ],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Validate Lua Syntax",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "shopt -s globstar; for file in factory-levels/*.lua factory-levels/prototypes/**/*.lua; do echo \"Checking $file...\"; lua5.3 -p \"$file\" || exit 1; done"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
