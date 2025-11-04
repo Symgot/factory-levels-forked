@@ -451,5 +451,323 @@ function TestDefinesCompleteness:testDirectionDefines()
     lu.assertEquals(defines.direction.west, 6)
 end
 
+-- Test: Phase 2 - Cargo Pods System (Space Age)
+TestCargoPods = {}
+
+function TestCargoPods:setUp()
+    factorio_mock.reset()
+end
+
+function TestCargoPods:testCargoPodEvents()
+    lu.assertNotNil(defines.events.on_cargo_pod_delivered)
+    lu.assertNotNil(defines.events.on_cargo_pod_departed)
+    lu.assertEquals(defines.events.on_cargo_pod_delivered, 120)
+    lu.assertEquals(defines.events.on_cargo_pod_departed, 121)
+end
+
+function TestCargoPods:testCargoPodEntityCreation()
+    local surface = game.surfaces[1]
+    local cargo_pod = surface.create_entity({
+        name = "cargo-pod",
+        position = {x = 0, y = 0}
+    })
+    
+    lu.assertNotNil(cargo_pod)
+    lu.assertTrue(cargo_pod.valid)
+    lu.assertEquals(cargo_pod.name, "cargo-pod")
+end
+
+function TestCargoPods:testCargoPodProperty()
+    local entity = factorio_mock.create_entity("cargo-pod", "cargo-pod")
+    
+    -- Property exists (can be nil)
+    lu.assertIsNil(entity.cargo_pod_entity)
+end
+
+-- Test: Phase 2 - Priority Targets & Military System (2.0.64+)
+TestPriorityTargets = {}
+
+function TestPriorityTargets:setUp()
+    factorio_mock.reset()
+end
+
+function TestPriorityTargets:testPriorityTargetsProperty()
+    local entity = factorio_mock.create_entity("gun-turret", "turret")
+    
+    -- Property exists (initially nil)
+    lu.assertIsNil(entity.priority_targets)
+    
+    -- Set priority targets
+    local target_entity = factorio_mock.create_entity("biter-spawner", "unit-spawner")
+    entity.priority_targets = {{entity = target_entity, priority = 1}}
+    
+    lu.assertNotNil(entity.priority_targets)
+    lu.assertEquals(#entity.priority_targets, 1)
+end
+
+function TestPriorityTargets:testPanelTextProperty()
+    local entity = factorio_mock.create_entity("display-panel", "simple-entity")
+    
+    lu.assertNotNil(entity.panel_text)
+    lu.assertEquals(entity.panel_text, "")
+    
+    -- Set panel text
+    entity.panel_text = "Factory Level: 5"
+    lu.assertEquals(entity.panel_text, "Factory Level: 5")
+end
+
+function TestPriorityTargets:testPanelTextEmpty()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    
+    lu.assertEquals(entity.panel_text, "")
+end
+
+-- Test: Phase 2 - Agricultural Tower API (Space Age)
+TestAgriculturalTower = {}
+
+function TestAgriculturalTower:setUp()
+    factorio_mock.reset()
+end
+
+function TestAgriculturalTower:testAgriculturalTowerPrototype()
+    lu.assertNotNil(data.raw["agricultural-tower"])
+end
+
+function TestAgriculturalTower:testRegisterTreeMethod()
+    local ag_tower = factorio_mock.create_entity("agricultural-tower", "agricultural-tower")
+    local tree = factorio_mock.create_entity("tree-01", "tree")
+    
+    lu.assertNotNil(ag_tower.register_tree_to_agricultural_tower)
+    
+    local result = ag_tower.register_tree_to_agricultural_tower(tree)
+    lu.assertTrue(result)
+end
+
+function TestAgriculturalTower:testRegisterTreeOnNonTower()
+    local assembler = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    local tree = factorio_mock.create_entity("tree-01", "tree")
+    
+    local result = assembler.register_tree_to_agricultural_tower(tree)
+    lu.assertFalse(result)
+end
+
+-- Test: Phase 2 - Quality Multiplier System
+TestQualityMultiplier = {}
+
+function TestQualityMultiplier:setUp()
+    factorio_mock.reset()
+end
+
+function TestQualityMultiplier:testGetQualityMultiplier()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    
+    lu.assertNotNil(entity.get_quality_multiplier)
+    
+    local multiplier = entity.get_quality_multiplier()
+    lu.assertEquals(multiplier, 1.0)
+end
+
+function TestQualityMultiplier:testQualityMultiplierUncommon()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    entity.set_quality("uncommon")
+    
+    local multiplier = entity.get_quality_multiplier()
+    lu.assertEquals(multiplier, 1.3)
+end
+
+function TestQualityMultiplier:testQualityMultiplierLegendary()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    entity.set_quality("legendary")
+    
+    local multiplier = entity.get_quality_multiplier()
+    lu.assertEquals(multiplier, 2.2)
+end
+
+function TestQualityMultiplier:testRecipeQualityProperty()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    
+    lu.assertNotNil(entity.recipe_quality)
+    lu.assertEquals(entity.recipe_quality, "normal")
+    
+    entity.set_recipe("iron-plate", "rare")
+    lu.assertEquals(entity.recipe_quality, "rare")
+end
+
+-- Test: Phase 2 - Logistic Sections API (2.0+)
+TestLogisticSections = {}
+
+function TestLogisticSections:setUp()
+    factorio_mock.reset()
+end
+
+function TestLogisticSections:testGetLogisticSections()
+    local entity = factorio_mock.create_entity("logistic-chest-storage", "logistic-container")
+    
+    lu.assertNotNil(entity.get_logistic_sections)
+    
+    local sections = entity.get_logistic_sections()
+    lu.assertNotNil(sections)
+    lu.assertEquals(type(sections), "table")
+end
+
+function TestLogisticSections:testSetLogisticSection()
+    local entity = factorio_mock.create_entity("logistic-chest-requester", "logistic-container")
+    
+    lu.assertNotNil(entity.set_logistic_section)
+    
+    local result = entity.set_logistic_section(1, {
+        filters = {{name = "iron-plate", count = 100}}
+    })
+    lu.assertTrue(result)
+end
+
+function TestLogisticSections:testLogisticSectionsOnNonLogisticEntity()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    
+    local sections = entity.get_logistic_sections()
+    lu.assertNotNil(sections)
+    lu.assertEquals(#sections, 0)
+end
+
+-- Test: Phase 2 - Space Age Entity Types
+TestSpaceAgeEntityTypes = {}
+
+function TestSpaceAgeEntityTypes:setUp()
+    factorio_mock.reset()
+    prototype_mock.init()
+end
+
+function TestSpaceAgeEntityTypes:testFusionGenerator()
+    lu.assertNotNil(data.raw["fusion-generator"])
+end
+
+function TestSpaceAgeEntityTypes:testFusionReactor()
+    lu.assertNotNil(data.raw["fusion-reactor"])
+end
+
+function TestSpaceAgeEntityTypes:testLightningAttractor()
+    lu.assertNotNil(data.raw["lightning-attractor"])
+end
+
+function TestSpaceAgeEntityTypes:testHeatingTower()
+    lu.assertNotNil(data.raw["heating-tower"])
+end
+
+function TestSpaceAgeEntityTypes:testCaptiveBiterSpawner()
+    lu.assertNotNil(data.raw["captive-biter-spawner"])
+end
+
+function TestSpaceAgeEntityTypes:testCargoPodPrototype()
+    lu.assertNotNil(data.raw["cargo-pod"])
+end
+
+-- Test: Phase 2 - Entity Creation with New Types
+TestNewEntityCreation = {}
+
+function TestNewEntityCreation:setUp()
+    factorio_mock.reset()
+end
+
+function TestNewEntityCreation:testCreateFusionGenerator()
+    local surface = game.surfaces[1]
+    local entity = surface.create_entity({
+        name = "fusion-generator",
+        position = {x = 5, y = 5}
+    })
+    
+    lu.assertNotNil(entity)
+    lu.assertTrue(entity.valid)
+    lu.assertEquals(entity.name, "fusion-generator")
+end
+
+function TestNewEntityCreation:testCreateAgriculturalTower()
+    local surface = game.surfaces[1]
+    local entity = surface.create_entity({
+        name = "agricultural-tower",
+        position = {x = 10, y = 10}
+    })
+    
+    lu.assertNotNil(entity)
+    lu.assertTrue(entity.valid)
+    lu.assertEquals(entity.name, "agricultural-tower")
+end
+
+function TestNewEntityCreation:testCreateHeatingTower()
+    local surface = game.surfaces[1]
+    local entity = surface.create_entity({
+        name = "heating-tower",
+        position = {x = 15, y = 15}
+    })
+    
+    lu.assertNotNil(entity)
+    lu.assertTrue(entity.valid)
+    lu.assertEquals(entity.name, "heating-tower")
+end
+
+-- Test: Phase 2 - Complete Event Coverage
+TestCompleteEventCoverage = {}
+
+function TestCompleteEventCoverage:testAllSpaceAgeEvents()
+    local space_age_events = {
+        "on_space_platform_built",
+        "on_space_platform_destroyed",
+        "on_space_platform_changed_state",
+        "on_asteroid_chunk_collision",
+        "on_elevated_rail_built",
+        "on_quality_item_created",
+        "on_entity_frozen",
+        "on_entity_spoiled",
+        "on_space_location_changed",
+        "on_platform_moved",
+        "on_cargo_pod_delivered",
+        "on_cargo_pod_departed"
+    }
+    
+    for _, event_name in ipairs(space_age_events) do
+        lu.assertNotNil(defines.events[event_name], "Missing event: " .. event_name)
+    end
+end
+
+function TestCompleteEventCoverage:testEventIDsUnique()
+    local seen_ids = {}
+    for event_name, event_id in pairs(defines.events) do
+        lu.assertNil(seen_ids[event_id], "Duplicate event ID: " .. event_id .. " for " .. event_name)
+        seen_ids[event_id] = event_name
+    end
+end
+
+-- Test: Phase 2 - Effects System Quality Integration
+TestEffectsQualityIntegration = {}
+
+function TestEffectsQualityIntegration:setUp()
+    factorio_mock.reset()
+end
+
+function TestEffectsQualityIntegration:testQualityEffectBonus()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    
+    lu.assertNotNil(entity.effects.quality)
+    lu.assertEquals(entity.effects.quality.bonus, 0)
+    lu.assertEquals(entity.effects.quality.base, 0)
+end
+
+function TestEffectsQualityIntegration:testQualityEffectModification()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    
+    entity.effects.quality.bonus = 0.5
+    lu.assertEquals(entity.effects.quality.bonus, 0.5)
+end
+
+function TestEffectsQualityIntegration:testQualityEffectWithMultiplier()
+    local entity = factorio_mock.create_entity("assembling-machine-1", "assembling-machine")
+    entity.set_quality("epic")
+    
+    local multiplier = entity.get_quality_multiplier()
+    local effects = entity.get_module_effects()
+    
+    lu.assertEquals(multiplier, 1.9)
+    lu.assertNotNil(effects.quality)
+end
+
 -- Run all tests
 os.exit(lu.LuaUnit.run())
