@@ -1,0 +1,463 @@
+/* Dashboard Styles */
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+.dashboard-header {
+  text-align: center;
+  padding: 2rem;
+  color: white;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.dashboard-header p {
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.dashboard-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-nav button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dashboard-nav button:hover:not(:disabled) {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
+}
+
+.dashboard-nav button.active {
+  background: white;
+  color: #667eea;
+  font-weight: bold;
+}
+
+.dashboard-nav button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dashboard-main {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  min-height: 500px;
+}
+
+/* File Uploader */
+.file-uploader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+}
+
+.upload-area {
+  width: 100%;
+  max-width: 600px;
+}
+
+#file-input {
+  display: none;
+}
+
+.upload-label {
+  display: block;
+  padding: 3rem;
+  border: 3px dashed #667eea;
+  border-radius: 12px;
+  background: #f8f9ff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.upload-label:hover {
+  background: #f0f2ff;
+  border-color: #764ba2;
+  transform: scale(1.02);
+}
+
+.upload-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #667eea;
+}
+
+.upload-icon {
+  font-size: 3rem;
+}
+
+.upload-hint {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.file-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #333;
+}
+
+.file-icon {
+  font-size: 3rem;
+}
+
+.file-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.file-size {
+  opacity: 0.6;
+}
+
+.validate-button {
+  padding: 1rem 3rem;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.validate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.validate-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Validation Results */
+.validation-results {
+  padding: 1rem;
+}
+
+.results-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.results-header h2 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+}
+
+.results-meta {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.result-card {
+  padding: 1.5rem;
+  background: #f8f9ff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.result-card h3 {
+  margin: 0 0 1rem 0;
+  color: #667eea;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 6px;
+}
+
+.stat-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.stat-value {
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-success {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.stat-error {
+  font-weight: bold;
+  color: #f44336;
+}
+
+/* Issues List */
+.issues-list {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #fff9e6;
+  border-radius: 12px;
+}
+
+.issues-list h3 {
+  margin: 0 0 1rem 0;
+  color: #ff9800;
+}
+
+.issue {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 1rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #ff9800;
+}
+
+.issue-error {
+  border-left-color: #f44336;
+}
+
+.issue-warning {
+  border-left-color: #ff9800;
+}
+
+.issue-type {
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: #ff9800;
+  color: white;
+  border-radius: 4px;
+}
+
+.issue-error .issue-type {
+  background: #f44336;
+}
+
+.issue-line {
+  font-family: monospace;
+  color: #666;
+}
+
+.issue-message {
+  color: #333;
+}
+
+/* Metrics Chart */
+.metrics-chart {
+  padding: 1rem;
+}
+
+.metrics-chart h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #667eea;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.metric-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.metric-value.large {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.metric-rating {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.metric-progress {
+  margin-top: 1rem;
+  height: 8px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.metric-progress-bar {
+  height: 100%;
+  background: white;
+  transition: width 0.5s;
+}
+
+/* Halstead Metrics */
+.halstead-metrics {
+  padding: 1.5rem;
+  background: #f8f9ff;
+  border-radius: 12px;
+}
+
+.halstead-metrics h3 {
+  margin: 0 0 1rem 0;
+  color: #667eea;
+  text-align: center;
+}
+
+.halstead-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.halstead-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+}
+
+.halstead-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.halstead-value {
+  font-weight: bold;
+  color: #667eea;
+}
+
+/* API Heatmap */
+.api-heatmap {
+  padding: 1rem;
+}
+
+.api-heatmap h2 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: #667eea;
+}
+
+.heatmap-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.heatmap-grid {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 2rem;
+  background: #f8f9ff;
+  border-radius: 12px;
+  min-height: 300px;
+}
+
+.heatmap-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 8px;
+  color: white;
+  min-width: 120px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.heatmap-cell:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.cell-label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.cell-value {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.cell-coverage {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+
+/* App Container */
+.App {
+  text-align: center;
+}
