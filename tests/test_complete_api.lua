@@ -309,6 +309,7 @@ end
 TestSurfaceAPI = {}
 
 function TestSurfaceAPI:setUp()
+    -- Reset game state completely for each test
     factorio_mock.reset()
 end
 
@@ -333,9 +334,7 @@ function TestSurfaceAPI:testEntityCreationOnSurface()
 end
 
 function TestSurfaceAPI:testFindEntitiesFiltered()
-    -- Get a fresh surface
-    factorio_mock.game.surfaces = {}
-    local surface = game.create_surface("test-find-entities")
+    local surface = game.surfaces[1]
     
     surface.create_entity({ name = "assembling-machine-1", position = { x = 0, y = 0 } })
     surface.create_entity({ name = "assembling-machine-2", position = { x = 5, y = 5 } })

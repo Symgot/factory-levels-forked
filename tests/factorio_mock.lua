@@ -285,6 +285,19 @@ if not _G.log then
     _G.log = factorio_mock.log
 end
 
+-- Helper to infer entity type from name
+local function infer_entity_type(name)
+    if name:find("furnace") then
+        return "furnace"
+    elseif name:find("assembling%-machine") or name:find("biochamber") or name:find("electromagnetic%-plant") then
+        return "assembling-machine"
+    elseif name:find("recycler") then
+        return "recycler"
+    else
+        return "assembling-machine"  -- Default
+    end
+end
+
 -- Mock inventory
 local function create_mock_inventory()
     local contents = {}
@@ -582,146 +595,139 @@ end
 -- Mock surface with complete API
 local function create_mock_surface()
     local surface_entities = {}
+    local surface_ref = {}
     
-    local surface_ref = {
-        index = 1,
-        name = "nauvis",
-        platform = nil, -- Space Age: nil for planets, object for space platforms
-        
-        -- Methods: Entity creation
-        create_entity = function(params)
-            if not params then
-                error("create_entity called with nil params", 2)
-            end
-            if not params.name then
-                error("create_entity called without name parameter", 2)
-            end
-            local entity = create_mock_entity(params.name, params.type or "assembling-machine")
-            -- Debug: Check if surface_ref is available
-            if not surface_ref then
-                error("surface_ref is nil in create_entity!", 2)
-            end
-            entity.surface = surface_ref
-            if params.position then entity.position = params.position end
-            if params.direction then entity.direction = params.direction end
-            if params.force then entity.force = params.force end
-            if params.quality then 
-                entity.quality = params.quality
-                entity.quality_prototype = factorio_mock.quality_prototypes[params.quality] or { name = params.quality, level = 0 }
-            end
-            
-            surface_entities[entity.unit_number] = entity
-            return entity
-        end,
-        
-        -- Methods: Entity finding
-        find_entities_filtered = function(filter)
-            local results = {}
-            for _, entity in pairs(surface_entities) do
-                if entity.valid then
-                    local matches = true
-                    
-                    if filter.type then
-                        local types = type(filter.type) == "table" and filter.type or { filter.type }
-                        local type_match = false
-                        for _, t in ipairs(types) do
-                            if entity.type == t then
-                                type_match = true
-                                break
-                            end
-                        end
-                        matches = matches and type_match
-                    end
-                    
-                    if filter.name and entity.name ~= filter.name then
-                        matches = false
-                    end
-                    
-                    if filter.force and entity.force ~= filter.force then
-                        matches = false
-                    end
-                    
-                    if filter.area then
-                        local x, y = entity.position.x, entity.position.y
-                        local area = filter.area
-                        if x < area.left_top.x or x > area.right_bottom.x or
-                           y < area.left_top.y or y > area.right_bottom.y then
-                            matches = false
-                        end
-                    end
-                    
-                    if matches then
-                        table.insert(results, entity)
-                    end
-                end
-            end
-            return results
-        end,
-        
-        find_entity = function(name, pos)
-            for _, entity in pairs(surface_entities) do
-                if entity.valid and entity.name == name then
-                    if pos == nil or (entity.position.x == pos.x and entity.position.y == pos.y) then
-                        return entity
-                    end
-                end
-            end
-            return nil
-        end,
-        
-        find_entities = function(area)
-            return surface_ref.find_entities_filtered({ area = area })
-        end,
-        
-        -- Methods: Terrain manipulation
-        get_tile = function(x, y)
-            return { name = "grass-1", position = { x = x, y = y } }
-        end,
-        
-        set_tiles = function(tiles, params)
-            return true
-        end,
-        
-        -- Methods: Chunks
-        is_chunk_generated = function(position)
-            return true
-        end,
-        
-        request_to_generate_chunks = function(position, radius)
-        end,
-        
-        force_generate_chunk_requests = function()
-        end,
-        
-        -- Methods: Pollution
-        get_pollution = function(position)
-            return 0
-        end,
-        
-        pollute = function(position, amount)
-        end,
-        
-        -- Methods: Misc
-        get_connected_tiles = function(position, tiles)
-            return {}
-        end,
-        
-        count_entities_filtered = function(filter)
-            return #surface_ref.find_entities_filtered(filter)
-        end,
-        
-        can_place_entity = function(params)
-            return true
-        end,
-        
-        spill_item_stack = function(position, items, params)
-            return {}
-        end,
-        
-        -- Space Age: Platform specific methods
-        request_to_generate_chunks = function(position, radius)
+    -- Basic properties
+    surface_ref.index = 1
+    surface_ref.name = "nauvis"
+    surface_ref.platform = nil
+    
+    -- Method: Entity creation
+    surface_ref.create_entity = function(params)
+        if not params then
+            error("create_entity called with nil params", 2)
         end
-    }
+        if not params.name then
+            error("create_entity called without name parameter", 2)
+        end
+        local entity_type = params.type or infer_entity_type(params.name)
+        local entity = create_mock_entity(params.name, entity_type)
+        entity.surface = surface_ref
+        if params.position then entity.position = params.position end
+        if params.direction then entity.direction = params.direction end
+        if params.force then entity.force = params.force end
+        if params.quality then 
+            entity.quality = params.quality
+            entity.quality_prototype = factorio_mock.quality_prototypes[params.quality] or { name = params.quality, level = 0 }
+        end
+        
+        surface_entities[entity.unit_number] = entity
+        return entity
+    end
+    
+    -- Method: Entity finding
+    surface_ref.find_entities_filtered = function(filter)
+        local results = {}
+        for _, entity in pairs(surface_entities) do
+            if entity.valid then
+                local matches = true
+                
+                if filter.type then
+                    local types = type(filter.type) == "table" and filter.type or { filter.type }
+                    local type_match = false
+                    for _, t in ipairs(types) do
+                        if entity.type == t then
+                            type_match = true
+                            break
+                        end
+                    end
+                    matches = matches and type_match
+                end
+                
+                if filter.name and entity.name ~= filter.name then
+                    matches = false
+                end
+                
+                if filter.force and entity.force ~= filter.force then
+                    matches = false
+                end
+                
+                if filter.area then
+                    local x, y = entity.position.x, entity.position.y
+                    local area = filter.area
+                    if x < area.left_top.x or x > area.right_bottom.x or
+                       y < area.left_top.y or y > area.right_bottom.y then
+                        matches = false
+                    end
+                end
+                
+                if matches then
+                    table.insert(results, entity)
+                end
+            end
+        end
+        return results
+    end
+    
+    surface_ref.find_entity = function(name, pos)
+        for _, entity in pairs(surface_entities) do
+            if entity.valid and entity.name == name then
+                if pos == nil or (entity.position.x == pos.x and entity.position.y == pos.y) then
+                    return entity
+                end
+            end
+        end
+        return nil
+    end
+    
+    surface_ref.find_entities = function(area)
+        return surface_ref.find_entities_filtered({ area = area })
+    end
+    
+    -- Method: Terrain
+    surface_ref.get_tile = function(x, y)
+        return { name = "grass-1", position = { x = x, y = y } }
+    end
+    
+    surface_ref.set_tiles = function(tiles, params)
+        return true
+    end
+    
+    -- Method: Chunks
+    surface_ref.is_chunk_generated = function(position)
+        return true
+    end
+    
+    surface_ref.request_to_generate_chunks = function(position, radius)
+    end
+    
+    surface_ref.force_generate_chunk_requests = function()
+    end
+    
+    -- Method: Pollution
+    surface_ref.get_pollution = function(position)
+        return 0
+    end
+    
+    surface_ref.pollute = function(position, amount)
+    end
+    
+    -- Method: Misc
+    surface_ref.get_connected_tiles = function(position, tiles)
+        return {}
+    end
+    
+    surface_ref.count_entities_filtered = function(filter)
+        return #surface_ref.find_entities_filtered(filter)
+    end
+    
+    surface_ref.can_place_entity = function(params)
+        return true
+    end
+    
+    surface_ref.spill_item_stack = function(position, items, params)
+        return {}
+    end
     
     return surface_ref
 end
