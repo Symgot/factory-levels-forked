@@ -70,6 +70,7 @@ prototype_mock.data = {
         ["space-platform-hub"] = {},
         ["asteroid-collector"] = {},
         ["cargo-bay"] = {},
+        ["cargo-pod"] = {},
         ["elevated-straight-rail"] = {},
         ["elevated-curved-rail"] = {},
         ["rail-ramp"] = {},

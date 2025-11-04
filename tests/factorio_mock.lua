@@ -45,6 +45,8 @@ factorio_mock.defines = {
         on_entity_spoiled = 108,
         on_space_location_changed = 109,
         on_platform_moved = 110,
+        on_cargo_pod_delivered = 120,
+        on_cargo_pod_departed = 121,
         
         -- Crafting and production events
         on_player_crafted_item = 20,
@@ -364,6 +366,13 @@ local function create_mock_entity(name, entity_type)
         space_location = nil,
         platform_id = nil,
         
+        -- Priority targets and display panels (2.0.64+)
+        priority_targets = nil,
+        panel_text = "",
+        
+        -- Cargo pod properties (Space Age)
+        cargo_pod_entity = nil,
+        
         -- Visual properties
         mirroring = false,
         orientation = 0,
@@ -541,6 +550,10 @@ local function create_mock_entity(name, entity_type)
             entity_ref.quality_prototype = factorio_mock.quality_prototypes[quality_name] or { name = quality_name, level = 0 }
             return true
         end,
+        get_quality_multiplier = function()
+            local quality_level = entity_ref.quality_prototype.level or 0
+            return 1.0 + (quality_level * 0.3)
+        end,
         
         -- Methods: Space Age specific
         freeze = function()
@@ -549,6 +562,22 @@ local function create_mock_entity(name, entity_type)
         end,
         unfreeze = function()
             entity_ref.frozen = false
+            return true
+        end,
+        
+        -- Methods: Agricultural Tower (Space Age)
+        register_tree_to_agricultural_tower = function(tree_entity)
+            if entity_ref.type == "agricultural-tower" then
+                return true
+            end
+            return false
+        end,
+        
+        -- Methods: Logistic Sections (Space Age 2.0+)
+        get_logistic_sections = function()
+            return {}
+        end,
+        set_logistic_section = function(section_index, section_data)
             return true
         end,
         
