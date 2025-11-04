@@ -48,6 +48,169 @@ factorio_mock.defines = {
         on_cargo_pod_delivered = 120,
         on_cargo_pod_departed = 121,
         
+        -- Extended events from Phase 4
+        CustomInputEvent = 200,
+        on_achievement_gained = 201,
+        on_area_cloned = 202,
+        on_biter_base_built = 203,
+        on_brush_cloned = 204,
+        on_build_base_arrived = 205,
+        on_cancelled_deconstruction = 206,
+        on_cancelled_upgrade = 207,
+        on_cargo_pod_delivered_cargo = 208,
+        on_cargo_pod_finished_ascending = 209,
+        on_cargo_pod_finished_descending = 210,
+        on_cargo_pod_started_ascending = 211,
+        on_character_corpse_expired = 212,
+        on_chart_tag_added = 213,
+        on_chart_tag_modified = 214,
+        on_chart_tag_removed = 215,
+        on_console_chat = 216,
+        on_console_command = 217,
+        on_cutscene_cancelled = 218,
+        on_cutscene_finished = 219,
+        on_cutscene_started = 220,
+        on_cutscene_waypoint_reached = 221,
+        on_entity_color_changed = 222,
+        on_entity_logistic_slot_changed = 223,
+        on_equipment_inserted = 224,
+        on_equipment_removed = 225,
+        on_force_cease_fire_changed = 226,
+        on_force_created = 227,
+        on_force_friends_changed = 228,
+        on_force_reset = 229,
+        on_forces_merged = 230,
+        on_forces_merging = 231,
+        on_game_created_from_scenario = 232,
+        on_gui_confirmed = 233,
+        on_gui_hover = 234,
+        on_gui_leave = 235,
+        on_gui_location_changed = 236,
+        on_gui_selected_tab_changed = 237,
+        on_gui_switch_state_changed = 238,
+        on_land_mine_armed = 239,
+        on_lua_shortcut = 240,
+        on_marked_for_deconstruction = 241,
+        on_marked_for_upgrade = 242,
+        on_market_item_purchased = 243,
+        on_mod_item_opened = 244,
+        on_multiplayer_init = 245,
+        on_object_destroyed = 246,
+        on_permission_group_added = 247,
+        on_permission_group_deleted = 248,
+        on_permission_group_edited = 249,
+        on_permission_string_imported = 250,
+        on_picked_up_item = 251,
+        on_player_alt_reverse_selected_area = 252,
+        on_player_ammo_inventory_changed = 253,
+        on_player_armor_inventory_changed = 254,
+        on_player_banned = 255,
+        on_player_built_tile = 256,
+        on_player_changed_force = 257,
+        on_player_cheat_mode_disabled = 258,
+        on_player_cheat_mode_enabled = 259,
+        on_player_clicked_gps_tag = 260,
+        on_player_configured_blueprint = 261,
+        on_player_controller_changed = 262,
+        on_player_cursor_stack_changed = 263,
+        on_player_deconstructed_area = 264,
+        on_player_demoted = 265,
+        on_player_display_density_scale_changed = 266,
+        on_player_display_resolution_changed = 267,
+        on_player_display_scale_changed = 268,
+        on_player_dropped_item = 269,
+        on_player_dropped_item_into_entity = 270,
+        on_player_fast_transferred = 271,
+        on_player_flipped_entity = 272,
+        on_player_flushed_fluid = 273,
+        on_player_gun_inventory_changed = 274,
+        on_player_input_method_changed = 275,
+        on_player_kicked = 276,
+        on_player_locale_changed = 277,
+        on_player_main_inventory_changed = 278,
+        on_player_mined_tile = 279,
+        on_player_muted = 280,
+        on_player_pipette = 281,
+        on_player_placed_equipment = 282,
+        on_player_promoted = 283,
+        on_player_removed = 284,
+        on_player_removed_equipment = 285,
+        on_player_reverse_selected_area = 286,
+        on_player_rotated_entity = 287,
+        on_player_set_quick_bar_slot = 288,
+        on_player_setup_blueprint = 289,
+        on_player_toggled_alt_mode = 290,
+        on_player_toggled_map_editor = 291,
+        on_player_trash_inventory_changed = 292,
+        on_player_unbanned = 293,
+        on_player_unmuted = 294,
+        on_player_used_capsule = 295,
+        on_player_used_spidertron_remote = 296,
+        on_post_entity_died = 297,
+        on_post_segmented_unit_died = 298,
+        on_pre_build = 299,
+        on_pre_chunk_deleted = 300,
+        on_pre_ghost_deconstructed = 301,
+        on_pre_ghost_upgraded = 302,
+        on_pre_permission_group_deleted = 303,
+        on_pre_permission_string_imported = 304,
+        on_pre_player_died = 305,
+        on_pre_player_left_game = 306,
+        on_pre_player_mined_item = 307,
+        on_pre_player_removed = 308,
+        on_pre_player_toggled_map_editor = 309,
+        on_pre_robot_exploded_cliff = 310,
+        on_pre_scenario_finished = 311,
+        on_pre_script_inventory_resized = 312,
+        on_pre_surface_deleted = 313,
+        on_redo_applied = 314,
+        on_research_moved = 315,
+        on_research_queued = 316,
+        on_robot_built_tile = 317,
+        on_robot_exploded_cliff = 318,
+        on_robot_mined_tile = 319,
+        on_robot_pre_mined = 320,
+        on_rocket_launch_ordered = 321,
+        on_rocket_launched = 322,
+        on_script_inventory_resized = 323,
+        on_script_path_request_finished = 324,
+        on_script_trigger_effect = 325,
+        on_segment_entity_created = 326,
+        on_segmented_unit_created = 327,
+        on_segmented_unit_damaged = 328,
+        on_segmented_unit_died = 329,
+        on_selected_entity_changed = 330,
+        on_singleplayer_init = 331,
+        on_space_platform_built_entity = 332,
+        on_space_platform_built_tile = 333,
+        on_space_platform_mined_entity = 334,
+        on_space_platform_mined_item = 335,
+        on_space_platform_mined_tile = 336,
+        on_space_platform_pre_mined = 337,
+        on_spider_command_completed = 338,
+        on_string_translated = 339,
+        on_surface_imported = 340,
+        on_surface_renamed = 341,
+        on_technology_effects_reset = 342,
+        on_territory_created = 343,
+        on_territory_destroyed = 344,
+        on_tower_mined_plant = 345,
+        on_tower_planted_seed = 346,
+        on_tower_pre_mined_plant = 347,
+        on_trigger_created_entity = 348,
+        on_trigger_fired_artillery = 349,
+        on_udp_packet_received = 350,
+        on_undo_applied = 351,
+        on_unit_added_to_group = 352,
+        on_unit_removed_from_group = 353,
+        on_worker_robot_expired = 354,
+        script_raised_built = 355,
+        script_raised_destroy = 356,
+        script_raised_destroy_segmented_unit = 357,
+        script_raised_revive = 358,
+        script_raised_set_tiles = 359,
+        script_raised_teleported = 360,
+        
         -- Crafting and production events
         on_player_crafted_item = 20,
         on_robot_crafted_item = 21,
@@ -137,7 +300,62 @@ factorio_mock.defines = {
         assembling_machine_output = 8,
         assembling_machine_modules = 9,
         lab_input = 10,
-        lab_modules = 11
+        lab_modules = 11,
+        -- Extended inventory types from Phase 4
+        agricultural_tower_input = 12,
+        agricultural_tower_output = 13,
+        artillery_turret_ammo = 14,
+        artillery_wagon_ammo = 15,
+        assembling_machine_dump = 16,
+        assembling_machine_trash = 17,
+        asteroid_collector_arm = 18,
+        asteroid_collector_output = 19,
+        beacon_modules = 20,
+        car_ammo = 21,
+        car_trash = 22,
+        car_trunk = 23,
+        cargo_landing_pad_main = 24,
+        cargo_landing_pad_trash = 25,
+        cargo_unit = 26,
+        cargo_wagon = 27,
+        character_ammo = 28,
+        character_armor = 29,
+        character_corpse = 30,
+        character_guns = 31,
+        character_main = 32,
+        character_trash = 33,
+        character_vehicle = 34,
+        crafter_input = 35,
+        crafter_modules = 36,
+        crafter_output = 37,
+        crafter_trash = 38,
+        editor_ammo = 39,
+        editor_armor = 40,
+        editor_guns = 41,
+        editor_main = 42,
+        furnace_trash = 43,
+        god_main = 44,
+        hub_main = 45,
+        hub_trash = 46,
+        item_main = 47,
+        lab_trash = 48,
+        linked_container_main = 49,
+        logistic_container_trash = 50,
+        mining_drill_modules = 51,
+        proxy_main = 52,
+        roboport_material = 53,
+        roboport_robot = 54,
+        robot_cargo = 55,
+        robot_repair = 56,
+        rocket_silo_input = 57,
+        rocket_silo_modules = 58,
+        rocket_silo_output = 59,
+        rocket_silo_rocket = 60,
+        rocket_silo_trash = 61,
+        spider_ammo = 62,
+        spider_trash = 63,
+        spider_trunk = 64,
+        turret_ammo = 65
     },
     flow_precision_index = {
         fifty_hours = 0,
@@ -146,7 +364,419 @@ factorio_mock.defines = {
         one_hour = 3,
         ten_minutes = 4,
         one_minute = 5,
-        five_seconds = 6
+        five_seconds = 6,
+        one_thousand_hours = 7,
+        two_hundred_fifty_hours = 8
+    },
+    -- Extended defines from Phase 4
+    alert_type = {
+        collector_path_blocked = 1,
+        custom = 2,
+        entity_destroyed = 3,
+        entity_under_attack = 4,
+        no_material_for_construction = 5,
+        no_platform_storage = 6,
+        no_roboport_storage = 7,
+        no_storage = 8,
+        not_enough_construction_robots = 9,
+        not_enough_repair_packs = 10,
+        pipeline_overextended = 11,
+        platform_tile_building_blocked = 12,
+        train_no_path = 13,
+        train_out_of_fuel = 14,
+        turret_fire = 15,
+        turret_out_of_ammo = 16,
+        unclaimed_cargo = 17
+    },
+    behavior_result = {
+        deleted = 1,
+        fail = 2,
+        in_progress = 3,
+        success = 4
+    },
+    build_check_type = {
+        blueprint_ghost = 1,
+        ghost_revive = 2,
+        manual = 3,
+        manual_ghost = 4,
+        script = 5,
+        script_ghost = 6
+    },
+    build_mode = {
+        forced = 1,
+        normal = 2,
+        superforced = 3
+    },
+    cargo_destination = {
+        invalid = 1,
+        orbit = 2,
+        space_platform = 3,
+        station = 4,
+        surface = 5
+    },
+    chain_signal_state = {
+        all_open = 1,
+        none = 2,
+        none_open = 3,
+        partially_open = 4
+    },
+    chunk_generated_status = {
+        basic_tiles = 1,
+        corrected_tiles = 2,
+        custom_tiles = 3,
+        entities = 4,
+        nothing = 5,
+        tiles = 6
+    },
+    command = {
+        attack = 1,
+        attack_area = 2,
+        build_base = 3,
+        compound = 4,
+        flee = 5,
+        go_to_location = 6,
+        group = 7,
+        stop = 8,
+        wander = 9
+    },
+    compound_command = {
+        logical_and = 1,
+        logical_or = 2,
+        return_last = 3
+    },
+    controllers = {
+        character = 1,
+        cutscene = 2,
+        editor = 3,
+        ghost = 4,
+        god = 5,
+        remote = 6,
+        spectator = 7
+    },
+    difficulty = {
+        easy = 1,
+        hard = 2,
+        normal = 3
+    },
+    disconnect_reason = {
+        afk = 1,
+        banned = 2,
+        cannot_keep_up = 3,
+        desync_limit_reached = 4,
+        dropped = 5,
+        kicked = 6,
+        kicked_and_deleted = 7,
+        quit = 8,
+        reconnect = 9,
+        switching_servers = 10,
+        wrong_input = 11
+    },
+    distraction = {
+        by_anything = 1,
+        by_damage = 2,
+        by_enemy = 3,
+        none = 4
+    },
+    entity_status = {
+        broken = 1,
+        cant_divide_segments = 2,
+        charging = 3,
+        closed_by_circuit_network = 4,
+        computing_navigation = 5,
+        destination_stop_full = 6,
+        disabled = 7,
+        disabled_by_control_behavior = 8,
+        disabled_by_script = 9,
+        discharging = 10,
+        fluid_ingredient_shortage = 11,
+        frozen = 12,
+        full_burnt_result_output = 13,
+        full_output = 14,
+        fully_charged = 15,
+        ghost = 16,
+        item_ingredient_shortage = 17,
+        launching_rocket = 18,
+        low_input_fluid = 19,
+        low_power = 20,
+        low_temperature = 21,
+        marked_for_deconstruction = 22,
+        missing_required_fluid = 23,
+        missing_science_packs = 24,
+        networks_connected = 25,
+        networks_disconnected = 26,
+        no_ammo = 27,
+        no_filter = 28,
+        no_fuel = 29,
+        no_ingredients = 30,
+        no_input_fluid = 31,
+        no_minable_resources = 32,
+        no_modules_to_transmit = 33,
+        no_path = 34,
+        no_power = 35,
+        no_recipe = 36,
+        no_research_in_progress = 37,
+        no_spot_seedable_by_inputs = 38,
+        normal = 39,
+        not_connected_to_hub_or_pad = 40,
+        not_connected_to_rail = 41,
+        not_enough_space_in_output = 42,
+        not_enough_thrust = 43,
+        not_plugged_in_electric_network = 44,
+        on_the_way = 45,
+        opened_by_circuit_network = 46,
+        out_of_logistic_network = 47,
+        paused = 48,
+        pipeline_overextended = 49,
+        preparing_rocket_for_launch = 50,
+        recharging_after_power_outage = 51,
+        recipe_is_parameter = 52,
+        recipe_not_researched = 53,
+        thrust_not_required = 54,
+        turned_off_during_daytime = 55,
+        waiting_at_stop = 56,
+        waiting_for_more_items = 57,
+        waiting_for_plants_to_grow = 58,
+        waiting_for_rockets_to_arrive = 59,
+        waiting_for_source_items = 60,
+        waiting_for_space_in_destination = 61,
+        waiting_for_space_in_platform_hub = 62,
+        waiting_for_target_to_be_built = 63,
+        waiting_for_train = 64,
+        waiting_in_orbit = 65,
+        waiting_to_launch_rocket = 66,
+        working = 67
+    },
+    entity_status_diode = {
+        green = 1,
+        red = 2,
+        yellow = 3
+    },
+    game_controller_interaction = {
+        always = 1,
+        never = 2,
+        normal = 3
+    },
+    group_state = {
+        attacking_distraction = 1,
+        attacking_target = 2,
+        finished = 3,
+        gathering = 4,
+        moving = 5,
+        pathfinding = 6,
+        wander_in_group = 7
+    },
+    gui_type = {
+        achievement = 1,
+        blueprint_library = 2,
+        bonus = 3,
+        controller = 4,
+        custom = 5,
+        entity = 6,
+        equipment = 7,
+        global_electric_network = 8,
+        item = 9,
+        logistic = 10,
+        none = 11,
+        opened_entity_grid = 12,
+        other_player = 13,
+        permissions = 14,
+        player_management = 15,
+        production = 16,
+        script_inventory = 17,
+        server_management = 18,
+        tile = 19,
+        trains = 20
+    },
+    input_method = {
+        game_controller = 1,
+        keyboard_and_mouse = 2
+    },
+    logistic_member_index = {
+        car_provider = 1,
+        car_requester = 2,
+        character_provider = 3,
+        character_requester = 4,
+        character_storage = 5,
+        generic_on_off_behavior = 6,
+        logistic_container = 7,
+        logistic_container_trash_provider = 8,
+        roboport_provider = 9,
+        roboport_requester = 10,
+        rocket_silo_provider = 11,
+        rocket_silo_requester = 12,
+        rocket_silo_trash_provider = 13,
+        space_platform_hub_provider = 14,
+        space_platform_hub_requester = 15,
+        spidertron_provider = 16,
+        spidertron_requester = 17,
+        vehicle_storage = 18
+    },
+    logistic_mode = {
+        active_provider = 1,
+        buffer = 2,
+        none = 3,
+        passive_provider = 4,
+        requester = 5,
+        storage = 6
+    },
+    logistic_section_type = {
+        circuit_controlled = 1,
+        manual = 2,
+        request_missing_materials_controlled = 3,
+        transitional_request_controlled = 4
+    },
+    mouse_button_type = {
+        left = 1,
+        middle = 2,
+        none = 3,
+        right = 4
+    },
+    moving_state = {
+        adaptive = 1,
+        moving = 2,
+        stale = 3,
+        stuck = 4
+    },
+    print_skip = {
+        if_redundant = 1,
+        if_visible = 2,
+        never = 3
+    },
+    print_sound = {
+        always = 1,
+        never = 2,
+        use_player_settings = 3
+    },
+    rail_connection_direction = {
+        left = 1,
+        none = 2,
+        right = 3,
+        straight = 4
+    },
+    rail_direction = {
+        back = 1,
+        front = 2
+    },
+    rail_layer = {
+        elevated = 1,
+        ground = 2
+    },
+    relative_gui_position = {
+        bottom = 1,
+        left = 2,
+        right = 3,
+        top = 4
+    },
+    render_mode = {
+        chart = 1,
+        chart_zoomed_in = 2,
+        game = 3
+    },
+    rich_text_setting = {
+        disabled = 1,
+        enabled = 2,
+        highlight = 3
+    },
+    robot_order_type = {
+        construct = 1,
+        deconstruct = 2,
+        deliver = 3,
+        deliver_items = 4,
+        explode_cliff = 5,
+        pickup = 6,
+        pickup_items = 7,
+        repair = 8,
+        upgrade = 9
+    },
+    rocket_silo_status = {
+        arms_advance = 1,
+        arms_retract = 2,
+        building_rocket = 3,
+        create_rocket = 4,
+        doors_closing = 5,
+        doors_opened = 6,
+        doors_opening = 7,
+        engine_starting = 8,
+        launch_started = 9,
+        launch_starting = 10,
+        lights_blinking_close = 11,
+        lights_blinking_open = 12,
+        rocket_flying = 13,
+        rocket_ready = 14,
+        rocket_rising = 15
+    },
+    selection_mode = {
+        alt_reverse_select = 1,
+        alt_select = 2,
+        reverse_select = 3,
+        select = 4
+    },
+    shooting = {
+        not_shooting = 1,
+        shooting_enemies = 2,
+        shooting_selected = 3
+    },
+    signal_state = {
+        closed = 1,
+        open = 2,
+        reserved = 3,
+        reserved_by_circuit_network = 4
+    },
+    space_platform_state = {
+        no_path = 1,
+        no_schedule = 2,
+        on_the_path = 3,
+        paused = 4,
+        starter_pack_on_the_way = 5,
+        starter_pack_requested = 6,
+        waiting_at_station = 7,
+        waiting_for_departure = 8,
+        waiting_for_starter_pack = 9
+    },
+    train_state = {
+        arrive_signal = 1,
+        arrive_station = 2,
+        destination_full = 3,
+        manual_control = 4,
+        manual_control_stop = 5,
+        no_path = 6,
+        no_schedule = 7,
+        on_the_path = 8,
+        wait_signal = 9,
+        wait_station = 10
+    },
+    transport_line = {
+        left_line = 1,
+        left_split_line = 2,
+        left_underground_line = 3,
+        right_line = 4,
+        right_split_line = 5,
+        right_underground_line = 6,
+        secondary_left_line = 7,
+        secondary_left_split_line = 8,
+        secondary_right_line = 9,
+        secondary_right_split_line = 10
+    },
+    wire_connector_id = {
+        circuit_green = 1,
+        circuit_red = 2,
+        combinator_input_green = 3,
+        combinator_input_red = 4,
+        combinator_output_green = 5,
+        combinator_output_red = 6,
+        pole_copper = 7,
+        power_switch_left_copper = 8,
+        power_switch_right_copper = 9
+    },
+    wire_origin = {
+        player = 1,
+        radars = 2,
+        script = 3
+    },
+    wire_type = {
+        copper = 1,
+        green = 2,
+        red = 3
     }
 }
 
@@ -922,5 +1552,206 @@ function factorio_mock.create_entity(name, entity_type, properties)
     end
     return entity
 end
+
+-- Phase 4: Extended Runtime Classes (148 missing classes)
+factorio_mock.runtime_classes = {}
+
+-- LuaBootstrap - Main script interface
+factorio_mock.runtime_classes.LuaBootstrap = {
+    on_init = function(callback) end,
+    on_load = function(callback) end,
+    on_configuration_changed = function(callback) end,
+    on_event = function(event, callback, filters) end,
+    on_nth_tick = function(tick, callback) end,
+    raise_event = function(event, data) end,
+    register_on_entity_destroyed = function(entity) return 1 end,
+    generate_event_name = function() return 1000 end
+}
+
+-- LuaControl - Base class for LuaPlayer and LuaEntity behaviors
+factorio_mock.runtime_classes.LuaControl = {
+    surface = nil,
+    position = {x = 0, y = 0},
+    force = nil,
+    teleport = function(self, position, surface) return true end,
+    can_reach_entity = function(self, entity) return true end,
+    clear_items_inside = function(self) return 0 end
+}
+
+-- LuaBurner - Burner energy source
+factorio_mock.runtime_classes.LuaBurner = {
+    currently_burning = nil,
+    fuel_categories = {},
+    inventory = {},
+    burnt_result_inventory = {},
+    remaining_burning_fuel = 0,
+    heat = 0,
+    heat_capacity = 1000
+}
+
+-- LuaFluidBox - Fluid box interface
+factorio_mock.runtime_classes.LuaFluidBox = {
+    get_prototype = function(self, index) return {} end,
+    get_capacity = function(self, index) return 1000 end,
+    get_connections = function(self, index) return {} end,
+    get_filter = function(self, index) return nil end,
+    set_filter = function(self, index, filter) return true end,
+    get_flow = function(self, index) return 0 end,
+    get_locked_fluid = function(self, index) return nil end,
+    get_fluid_system_id = function(self, index) return 0 end,
+    get_fluid_system_contents = function(self, index) return {} end
+}
+
+-- Additional runtime classes for comprehensive coverage
+factorio_mock.runtime_classes.LuaCircuitNetwork = {valid = true, network_id = 0, signals = {}}
+factorio_mock.runtime_classes.LuaWireConnector = {valid = true, wire_connector_id = 1, connections = {}}
+factorio_mock.runtime_classes.LuaControlBehavior = {valid = true, entity = nil, type = nil}
+
+-- LuaLogisticNetwork - Logistic network
+factorio_mock.runtime_classes.LuaLogisticNetwork = {valid = true, force = nil, all_logistic_robots = 0, available_logistic_robots = 0, all_construction_robots = 0, available_construction_robots = 0}
+factorio_mock.runtime_classes.LuaLogisticPoint = {valid = true, owner = nil, mode = 1}
+factorio_mock.runtime_classes.LuaLogisticCell = {valid = true, mobile = false, owner = nil}
+factorio_mock.runtime_classes.LuaLogisticSection = {valid = true, owner = nil, index = 1}
+factorio_mock.runtime_classes.LuaLogisticSections = {valid = true, owner = nil, sections = {}}
+factorio_mock.runtime_classes.LuaTrain = {valid = true, id = 1, state = 8, speed = 0}
+factorio_mock.runtime_classes.LuaRailPath = {valid = true, size = 0, current = 1}
+factorio_mock.runtime_classes.LuaTrainManager = {get_train_by_id = function(self, id) return nil end}
+factorio_mock.runtime_classes.LuaTransportLine = {valid = true, owner = nil, get_contents = function(self) return {} end}
+factorio_mock.runtime_classes.LuaEquipmentGrid = {valid = true, width = 10, height = 10, equipment = {}}
+factorio_mock.runtime_classes.LuaEquipment = {valid = true, name = "", type = "", energy = 0}
+factorio_mock.runtime_classes.LuaRecipe = {valid = true, name = "", enabled = true, category = "crafting"}
+factorio_mock.runtime_classes.LuaTechnology = {valid = true, name = "", researched = false, level = 1}
+factorio_mock.runtime_classes.LuaCustomTable = {}
+factorio_mock.runtime_classes.LuaLazyLoadedValue = {valid = true, get = function(self) return nil end}
+factorio_mock.runtime_classes.LuaProfiler = {valid = true, reset = function(self) end}
+factorio_mock.runtime_classes.LuaFlowStatistics = {valid = true, get_input_count = function(self, name) return 0 end}
+factorio_mock.runtime_classes.LuaPermissionGroup = {valid = true, name = "", group_id = 1, players = {}}
+factorio_mock.runtime_classes.LuaPermissionGroups = {groups = {}, get_group = function(self, group) return nil end}
+factorio_mock.runtime_classes.LuaGui = {valid = true, top = {}, left = {}, center = {}}
+factorio_mock.runtime_classes.LuaGuiElement = {valid = true, name = "", type = "button", visible = true}
+factorio_mock.runtime_classes.LuaStyle = {valid = true, name = "", minimal_width = 0}
+factorio_mock.runtime_classes.LuaGroup = {valid = true, name = "", type = "item"}
+factorio_mock.runtime_classes.LuaCommandProcessor = {commands = {}}
+factorio_mock.runtime_classes.LuaCommandable = {valid = true, entity = nil, command = nil}
+factorio_mock.runtime_classes.LuaChunkIterator = {}
+factorio_mock.runtime_classes.LuaRandomGenerator = {valid = true}
+factorio_mock.runtime_classes.LuaRendering = {}
+factorio_mock.runtime_classes.LuaRenderObject = {valid = true, id = 1, type = "line"}
+factorio_mock.runtime_classes.LuaRemote = {interfaces = {}}
+factorio_mock.runtime_classes.LuaSettings = {startup = {}, global = {}, player = {}}
+factorio_mock.runtime_classes.LuaRCON = {print = function(msg) print("[RCON] " .. msg) end}
+factorio_mock.runtime_classes.LuaHelpers = {}
+
+-- Space Age classes
+factorio_mock.runtime_classes.LuaPlanet = {valid = true, name = "nauvis", surface = nil}
+factorio_mock.runtime_classes.LuaSpacePlatform = {valid = true, name = "", surface = nil, force = nil}
+factorio_mock.runtime_classes.LuaSpaceConnection = {valid = true, name = "", from = nil, to = nil}
+factorio_mock.runtime_classes.LuaSpaceLocation = {valid = true, name = "", type = "planet"}
+factorio_mock.runtime_classes.LuaCargoHatch = {valid = true, entity = nil, filter = nil}
+factorio_mock.runtime_classes.LuaTerritory = {valid = true, name = "", surface = nil}
+factorio_mock.runtime_classes.LuaSegment = {valid = true, entity = nil, segment_index = 0}
+factorio_mock.runtime_classes.LuaSegmentedUnit = {valid = true, segments = {}}
+
+-- Prototype classes
+factorio_mock.runtime_classes.LuaAchievementPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaActiveTriggerPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaAirbornePollutantPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaAmmoCategoryPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaAsteroidChunkPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaAutoplaceControlPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaBurnerPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaBurnerUsagePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaCollisionLayerPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaCustomEventPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaCustomInputPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaDamagePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaDecorativePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaElectricEnergySourcePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaEquipmentCategoryPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaEquipmentGridPrototype = {valid = true, name = "", width = 10, height = 10}
+factorio_mock.runtime_classes.LuaEquipmentPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaFluidBoxPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaFluidEnergySourcePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaFluidPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaFontPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaFuelCategoryPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaHeatBufferPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaHeatEnergySourcePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaItemPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaItemCommon = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaModSettingPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaModuleCategoryPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaNamedNoiseExpression = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaNamedNoiseFunction = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaParticlePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaProcessionLayerInheritanceGroupPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaProcessionPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaPrototypeBase = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaPrototypes = {valid = true, entity = {}, item = {}}
+factorio_mock.runtime_classes.LuaQualityPrototype = {valid = true, name = "normal", level = 0}
+factorio_mock.runtime_classes.LuaRecipeCategoryPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaRecipePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaRecord = {valid = true}
+factorio_mock.runtime_classes.LuaResourceCategoryPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaShortcutPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaSimulation = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaSpaceConnectionPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaSpaceLocationPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaSurfacePropertyPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaSurfacePrototype = {valid = true, name = "nauvis"}
+factorio_mock.runtime_classes.LuaTechnologyPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaTilePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaTrivialSmokePrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaVirtualSignalPrototype = {valid = true, name = ""}
+factorio_mock.runtime_classes.LuaVoidEnergySourcePrototype = {valid = true, name = ""}
+
+-- Additional control behaviors
+factorio_mock.runtime_classes.LuaAccumulatorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaArithmeticCombinatorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaDeciderCombinatorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaConstantCombinatorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaGenericOnOffControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaInserterControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaLampControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaContainerControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaStorageTankControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaTransportBeltControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaMiningDrillControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaWallControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaProgrammableSpeakerControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaRoboportControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaTrainStopControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaRailSignalBaseControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaSplitterControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaAssemblingMachineControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaFurnaceControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaReactorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaRadarControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaPumpControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaRocketSiloControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaLoaderControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaLogisticContainerControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaProxyContainerControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaTurretControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaArtilleryTurretControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaDisplayPanelControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaSelectorCombinatorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaCombinatorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaAgriculturalTowerControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaAsteroidCollectorControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaCargoLandingPadControlBehavior = {valid = true}
+factorio_mock.runtime_classes.LuaSpacePlatformHubControlBehavior = {valid = true}
+
+-- Additional missing classes
+factorio_mock.runtime_classes.LuaRailEnd = {valid = true, rail = nil, direction = 0}
+factorio_mock.runtime_classes.LuaSchedule = {valid = true, records = {}, current = 1}
+factorio_mock.runtime_classes.LuaAISettings = {valid = true, allow_destroy_when_commands_fail = true}
+factorio_mock.runtime_classes.LuaModData = {valid = true}
+factorio_mock.runtime_classes.LuaItem = {valid = true, name = "", count = 1}
+factorio_mock.runtime_classes.LuaTile = {valid = true, name = "", position = {x = 0, y = 0}}
+factorio_mock.runtime_classes.LuaCustomChartTag = {valid = true, text = ""}
+factorio_mock.runtime_classes.LuaUndoRedoStack = {valid = true, can_undo = false}
+factorio_mock.runtime_classes.LuaInventory = {valid = true, index = 1, get_item_count = function(self, item) return 0 end}
+factorio_mock.runtime_classes.LuaItemStack = {valid = true, name = nil, count = 0}
 
 return factorio_mock
