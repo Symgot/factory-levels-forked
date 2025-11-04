@@ -19,6 +19,20 @@
             "problemMatcher": []
         },
         {
+            "label": "Run All Syntax Tests",
+            "type": "shell",
+            "command": "lua5.3",
+            "args": [
+                "tests/test_syntax_all.lua"
+            ],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Run Lua Tests (Verbose)",
             "type": "shell",
             "command": "lua5.3",

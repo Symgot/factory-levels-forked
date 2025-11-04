@@ -28,11 +28,13 @@ jobs:
         test -f tests/luaunit.lua || exit 1
         test -f tests/factorio_mock.lua || exit 1
         test -f tests/test_control.lua || exit 1
+        test -f tests/test_syntax_all.lua || exit 1
         
     - name: Run syntax validation tests
       run: |
         cd tests
         lua5.3 test_control.lua
+        lua5.3 test_syntax_all.lua
         
     - name: Test summary
       if: always()
