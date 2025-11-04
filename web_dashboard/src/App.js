@@ -25,7 +25,15 @@ function ValidationDashboard() {
     
     setLoading(true);
     
-    // Simulate validation (in production, would call backend API)
+    // TODO: Production backend integration
+    // Replace mock validation with actual API call to Lua validation engine
+    // Example: const response = await fetch('/api/validate', {
+    //   method: 'POST',
+    //   body: formData
+    // });
+    // const results = await response.json();
+    
+    // MOCK VALIDATION - For demonstration only
     setTimeout(() => {
       const mockResults = {
         valid: true,

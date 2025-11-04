@@ -799,8 +799,17 @@ function enhanced_parser.extract_advanced_metrics(ast)
     local G = metrics.cyclomatic_complexity
     local LOC = metrics.lines_of_code
     
+    -- Maintainability Index constants (SEI standard formula)
+    -- MI = 171 - 5.2*ln(V) - 0.23*G - 16.2*ln(LOC)
+    -- Reference: https://docs.microsoft.com/en-us/visualstudio/code-quality/code-metrics-values
+    local MI_BASE = 171              -- Base constant
+    local MI_VOLUME_FACTOR = 5.2     -- Volume weight
+    local MI_COMPLEXITY_FACTOR = 0.23 -- Complexity weight
+    local MI_LOC_FACTOR = 16.2       -- LOC weight
+    
     if V > 0 and LOC > 0 then
-        metrics.maintainability_index = math.max(0, (171 - 5.2 * math.log(V) - 0.23 * G - 16.2 * math.log(LOC)) * 100 / 171)
+        local mi_raw = MI_BASE - MI_VOLUME_FACTOR * math.log(V) - MI_COMPLEXITY_FACTOR * G - MI_LOC_FACTOR * math.log(LOC)
+        metrics.maintainability_index = math.max(0, mi_raw * 100 / MI_BASE)  -- Normalize to 0-100
     end
     
     return metrics

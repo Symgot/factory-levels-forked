@@ -146,13 +146,19 @@ async function validateDocument(document, showErrors = true) {
     const diagnostics = [];
     const text = document.getText();
 
-    // Simple syntax validation (in production, would call Lua validator)
+    // TODO: Production validator integration
+    // Replace simple pattern matching with actual Lua parser from Phase 6
+    // Example: const { spawn } = require('child_process');
+    // const validator = spawn('lua5.4', ['validation_engine.lua', document.uri.fsPath]);
+    // Parse validator output and create diagnostics from results
+    
+    // SIMPLIFIED VALIDATION - Pattern-based checks for demonstration
     const lines = text.split('\n');
     
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         
-        // Check for common issues
+        // Check for common issues (simplified - real validator would use enhanced_parser.lua)
         if (line.includes('game.player')) {
             diagnostics.push({
                 severity: vscode.DiagnosticSeverity.Warning,
