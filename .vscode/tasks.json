@@ -53,7 +53,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "for file in factory-levels/*.lua factory-levels/prototypes/**/*.lua; do echo \"Checking $file...\"; lua5.3 -p \"$file\" || exit 1; done"
+                "shopt -s globstar; for file in factory-levels/*.lua factory-levels/prototypes/**/*.lua; do echo \"Checking $file...\"; lua5.3 -p \"$file\" || exit 1; done"
             ],
             "group": "build",
             "presentation": {

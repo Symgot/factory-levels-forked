@@ -20,10 +20,11 @@ local lua_files = {
 
 -- Test each file for syntax validity
 for _, filepath in ipairs(lua_files) do
-    local test_name = filepath:gsub("[^%w]+", "_")
-    TestAllLuaFiles["testSyntax_" .. test_name] = function()
+    local filename = filepath:match("([^/]+)$") or filepath
+    local test_name = "test_" .. filename:gsub("[^%w]+", "_")
+    TestAllLuaFiles[test_name] = function()
         local chunk, err = loadfile(filepath)
-        lu.assertNotNil(chunk, "Syntax error in " .. filepath .. ": " .. tostring(err))
+        lu.assertNotNil(chunk, "Syntax error in " .. filename .. " (" .. filepath .. "): " .. tostring(err))
     end
 end
 

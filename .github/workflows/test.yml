@@ -2,9 +2,9 @@ name: Lua Tests
 
 on:
   push:
-    branches: [ main, master, develop, copilot/** ]
+    branches: [ main, develop, copilot/** ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main, develop ]
   workflow_dispatch:
 
 jobs:

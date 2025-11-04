@@ -53,10 +53,7 @@ function TestInvisibleModules:setUp()
 end
 
 function TestInvisibleModules:testBonusFormulas()
-    -- Test that bonus formulas are defined correctly
-    local control = dofile("../factory-levels/control.lua")
-    
-    -- Bonus formulas should exist
+    dofile("../factory-levels/control.lua")
     lu.assertNotNil(_G.bonus_formulas or {}, "Bonus formulas should be defined")
 end
 

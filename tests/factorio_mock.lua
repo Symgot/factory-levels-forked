@@ -116,6 +116,12 @@ local function create_mock_surface()
         index = 1,
         name = "nauvis",
         create_entity = function(params)
+            if not params then
+                error("create_entity called with nil params", 2)
+            end
+            if not params.name then
+                error("create_entity called without name parameter", 2)
+            end
             return create_mock_entity(params.name, params.type or "assembling-machine")
         end,
         find_entities_filtered = function(filter)
