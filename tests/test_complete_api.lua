@@ -38,8 +38,8 @@ function TestCompleteEntityAPI:testSpaceAgeProperties()
     lu.assertNotNil(entity.quality_prototype)
     lu.assertEquals(entity.spoil_percent, 0)
     lu.assertEquals(entity.frozen, false)
-    lu.assertNil(entity.space_location)
-    lu.assertNil(entity.platform_id)
+    lu.assertTrue(entity.space_location == false or entity.space_location == nil)
+    lu.assertTrue(entity.platform_id == false or entity.platform_id == nil)
 end
 
 function TestCompleteEntityAPI:testEffectsSystem()
@@ -480,8 +480,8 @@ end
 function TestCargoPods:testCargoPodProperty()
     local entity = factorio_mock.create_entity("cargo-pod", "cargo-pod")
     
-    -- Property exists (can be nil)
-    lu.assertIsNil(entity.cargo_pod_entity)
+    -- Property exists (can be nil or false)
+    lu.assertTrue(entity.cargo_pod_entity == false or entity.cargo_pod_entity == nil)
 end
 
 -- Test: Phase 2 - Priority Targets & Military System (2.0.64+)
@@ -494,8 +494,8 @@ end
 function TestPriorityTargets:testPriorityTargetsProperty()
     local entity = factorio_mock.create_entity("gun-turret", "turret")
     
-    -- Property exists (initially nil)
-    lu.assertIsNil(entity.priority_targets)
+    -- Property exists (initially false or nil)
+    lu.assertTrue(entity.priority_targets == false or entity.priority_targets == nil)
     
     -- Set priority targets
     local target_entity = factorio_mock.create_entity("biter-spawner", "unit-spawner")

@@ -66,6 +66,7 @@ factorio_mock.defines = {
         on_research_finished = 41,
         on_research_reversed = 42,
         on_research_cancelled = 43,
+        on_technology_effects_reset = 44,
         
         -- Player events
         on_player_created = 50,
@@ -76,6 +77,8 @@ factorio_mock.defines = {
         on_player_changed_position = 55,
         on_player_changed_surface = 56,
         on_player_driving_changed_state = 57,
+        on_player_cursor_stack_changed = 58,
+        on_player_main_inventory_changed = 59,
         
         -- GUI events
         on_gui_click = 60,
@@ -86,6 +89,8 @@ factorio_mock.defines = {
         on_gui_selection_state_changed = 65,
         on_gui_checked_state_changed = 66,
         on_gui_value_changed = 67,
+        on_gui_location_changed = 68,
+        on_gui_switch_state_changed = 69,
         
         -- Combat events
         on_sector_scanned = 70,
@@ -363,15 +368,15 @@ local function create_mock_entity(name, entity_type)
         quality_prototype = { name = "normal", level = 0 },
         spoil_percent = 0,
         frozen = false,
-        space_location = nil,
-        platform_id = nil,
+        space_location = false, -- false = not set, allows key detection in validation
+        platform_id = false, -- false = not set, allows key detection in validation
         
         -- Priority targets and display panels (2.0.64+)
-        priority_targets = nil,
+        priority_targets = false, -- false = not set, allows key detection in validation
         panel_text = "",
         
         -- Cargo pod properties (Space Age)
-        cargo_pod_entity = nil,
+        cargo_pod_entity = false, -- false = not set, allows key detection in validation
         
         -- Visual properties
         mirroring = false,
@@ -407,9 +412,9 @@ local function create_mock_entity(name, entity_type)
         pollution_bonus = 0,
         
         -- Recipe and crafting
-        recipe = nil,
+        recipe = false,
         recipe_quality = "normal",
-        previous_recipe = nil,
+        previous_recipe = false,
         
         -- Energy
         energy = 0,
@@ -443,8 +448,37 @@ local function create_mock_entity(name, entity_type)
         -- Fluid boxes (for assembling machines with fluid recipes)
         fluidbox = {},
         
-        -- Surface reference
-        surface = nil, -- Will be set during initialization
+        -- Surface reference (will be set during initialization)
+        surface = false, -- false indicates not yet set
+        
+        -- Visual properties (additional)
+        backer_name = false,
+        color = false,
+        
+        -- Mining properties
+        mining_progress = 0,
+        mining_target = false,
+        resource_amount = false,
+        
+        -- Circuit network properties
+        circuit_connected_entities = {},
+        wire_connectors = {},
+        
+        -- Transport properties
+        transport_lines = {},
+        loader_filter = false,
+        splitter_filter = false,
+        splitter_input_priority = "left",
+        splitter_output_priority = "left",
+        belt_to_ground_type = "input",
+        
+        -- Additional state properties
+        active = true,
+        minable = true,
+        selected = false,
+        request_slot_count = 0,
+        filter_slot_count = 0,
+        recipe_locked = false,
         
         -- Methods: Inventory management
         get_inventory = function(inventory_type)
@@ -458,6 +492,9 @@ local function create_mock_entity(name, entity_type)
         end,
         get_fuel_inventory = function()
             return mock_inventories[factorio_mock.defines.inventory.fuel]
+        end,
+        get_burnt_result_inventory = function()
+            return create_mock_inventory()
         end,
         
         -- Methods: Entity manipulation
@@ -540,6 +577,9 @@ local function create_mock_entity(name, entity_type)
                 quality = entity_ref.effects.quality.bonus
             }
         end,
+        get_beacons = function()
+            return {}
+        end,
         
         -- Methods: Quality system
         get_quality = function()
@@ -586,6 +626,24 @@ local function create_mock_entity(name, entity_type)
             return entity_ref.rotatable
         end,
         
+        -- Methods: Circuit network (added for completeness)
+        get_circuit_network = function(wire_type, circuit_connector)
+            return {
+                connected = false,
+                network_id = 0,
+                signals = {},
+                get_signal = function(signal)
+                    return 0
+                end
+            }
+        end,
+        connect_neighbour = function(params)
+            return true
+        end,
+        disconnect_neighbour = function(params)
+            return true
+        end,
+        
         -- Methods: Misc
         copy_settings = function(source_entity, by_player)
             if source_entity.recipe then
@@ -611,10 +669,6 @@ local function create_mock_entity(name, entity_type)
         
         get_connected_rails = function()
             return {}
-        end,
-        
-        get_burnt_result_inventory = function()
-            return mock_inventories[factorio_mock.defines.inventory.burnt_result]
         end
     }
     
