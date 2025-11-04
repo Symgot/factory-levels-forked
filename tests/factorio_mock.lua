@@ -195,6 +195,11 @@ factorio_mock.game = {
         return factorio_mock.game.players[player_id]
     end,
     
+    -- Space Age: Create space platform
+    create_space_platform = function(name)
+        return factorio_mock.create_space_platform(name)
+    end,
+    
     -- Space Age: Quality system
     quality_prototypes = {},
     
@@ -832,6 +837,9 @@ function factorio_mock.init()
     package.preload["util"] = function()
         return factorio_mock.util
     end
+    
+    -- Make util globally available
+    _G.util = factorio_mock.util
     
     -- Add default surface
     factorio_mock.game.surfaces[1] = create_mock_surface()
