@@ -391,17 +391,18 @@ function syntax_validator.validate_factorio_api(ast)
         return true, issues
     end
     
-    -- Check for deprecated API usage
+    -- Check for deprecated API usage (exact matches only)
     local deprecated_apis = {
-        "global.", -- Should use 'storage' in Factorio 2.0
-        "game.player", -- Should iterate game.players
+        ["^global%."] = true,  -- Match 'global.' at start
+        ["^game%.player$"] = true,  -- Exact match 'game.player'
     }
     
     local source = ast.source or ""
-    for _, deprecated in ipairs(deprecated_apis) do
-        if source:find(deprecated, 1, true) then
+    for pattern, _ in pairs(deprecated_apis) do
+        if source:find(pattern) then
+            local api_name = pattern:gsub("%^", ""):gsub("%$", ""):gsub("%%.", ".")
             table.insert(issues, string.format(
-                "Deprecated API usage: %s (consider alternatives)", deprecated))
+                "Deprecated API usage: %s (consider alternatives)", api_name))
         end
     end
     

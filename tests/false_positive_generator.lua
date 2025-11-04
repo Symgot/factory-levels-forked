@@ -266,7 +266,9 @@ end)
         return string.format([[
 -- Property type validation
 local value = %s.%s
-assert(type(value) == type(value), "Property should have consistent type")
+local value_type = type(value)
+assert(value ~= nil, "Property should exist")
+assert(value_type ~= "nil", "Property should have a type")
 ]], namespace, member)
     end
 end

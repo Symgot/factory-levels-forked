@@ -172,12 +172,14 @@ api_reference_checker.DEPRECATED_APIS = {
     ["global"] = {
         replacement = "storage",
         reason = "Replaced by 'storage' in Factorio 2.0",
-        since = "2.0.0"
+        since = "2.0.0",
+        match_type = "namespace"  -- Match entire namespace
     },
     ["game.player"] = {
         replacement = "game.players (iterate or index)",
         reason = "Direct game.player is unreliable in multiplayer",
-        since = "1.0.0"
+        since = "1.0.0",
+        match_type = "full_path"  -- Match exact full path
     }
 }
 
@@ -194,8 +196,21 @@ function api_reference_checker.is_deprecated(api_call)
                       (api_call.namespace .. "." .. (api_call.member or ""))
     
     for deprecated_api, info in pairs(api_reference_checker.DEPRECATED_APIS) do
-        if full_name == deprecated_api or full_name:find("^" .. deprecated_api) then
-            return true, info
+        if info.match_type == "namespace" then
+            -- Match namespace only
+            if api_call.namespace == deprecated_api then
+                return true, info
+            end
+        elseif info.match_type == "full_path" then
+            -- Match exact full path
+            if full_name == deprecated_api then
+                return true, info
+            end
+        else
+            -- Default: try both
+            if full_name == deprecated_api or api_call.namespace == deprecated_api then
+                return true, info
+            end
         end
     end
     

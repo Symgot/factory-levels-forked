@@ -57,13 +57,18 @@ function reverse_parser.tokenize(source)
         elseif char == '"' or char == "'" then
             local quote = char
             local string_end = pos + 1
+            local escaped = false
             while string_end <= len do
-                if source:sub(string_end, string_end) == quote then
-                    if source:sub(string_end-1, string_end-1) ~= "\\" then
-                        break
-                    end
+                local current = source:sub(string_end, string_end)
+                if current == "\\" then
+                    escaped = not escaped
+                    string_end = string_end + 1
+                elseif current == quote and not escaped then
+                    break
+                else
+                    escaped = false
+                    string_end = string_end + 1
                 end
-                string_end = string_end + 1
             end
             local string_value = source:sub(pos+1, string_end-1)
             table.insert(tokens, {type = "string", value = string_value, pos = pos})

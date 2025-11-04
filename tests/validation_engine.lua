@@ -362,9 +362,10 @@ function validation_engine.analyze_api_coverage(directory)
         coverage.api_usage_count[api_name] = count
     end
     
-    -- TODO: Get total API elements from mock
-    -- For now, use placeholder
-    coverage.total_api_elements = 500
+    -- Get total API elements from API reference checker
+    local api_reference_checker = require('api_reference_checker')
+    local all_elements = api_reference_checker.get_all_api_elements()
+    coverage.total_api_elements = #all_elements
     
     if coverage.total_api_elements > 0 then
         coverage.coverage_percentage = (coverage.used_api_elements / coverage.total_api_elements) * 100
