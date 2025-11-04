@@ -368,15 +368,15 @@ local function create_mock_entity(name, entity_type)
         quality_prototype = { name = "normal", level = 0 },
         spoil_percent = 0,
         frozen = false,
-        space_location = false,
-        platform_id = false,
+        space_location = false, -- false = not set, allows key detection in validation
+        platform_id = false, -- false = not set, allows key detection in validation
         
         -- Priority targets and display panels (2.0.64+)
-        priority_targets = false,
+        priority_targets = false, -- false = not set, allows key detection in validation
         panel_text = "",
         
         -- Cargo pod properties (Space Age)
-        cargo_pod_entity = false,
+        cargo_pod_entity = false, -- false = not set, allows key detection in validation
         
         -- Visual properties
         mirroring = false,

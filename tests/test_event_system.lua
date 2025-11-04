@@ -208,6 +208,7 @@ function TestSpaceAgeEvents:testCargoPodEvents()
     lu.assertNotNil(defines.events.on_cargo_pod_delivered)
     lu.assertNotNil(defines.events.on_cargo_pod_departed)
     
+    -- Verify specific IDs match Phase 2 implementation
     lu.assertEquals(defines.events.on_cargo_pod_delivered, 120)
     lu.assertEquals(defines.events.on_cargo_pod_departed, 121)
 end
