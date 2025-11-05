@@ -431,7 +431,7 @@ app.post('/api/validate/file', authenticateToken, upload.single('file'), async (
         const uploadDir = path.resolve(CONFIG.UPLOAD_DIR);
         const filePath = path.resolve(req.file.path);
         if (!filePath.startsWith(uploadDir)) {
-            await fs.unlink(req.file.path).catch(() => {});
+            await fs.unlink(filePath).catch(() => {});
             return res.status(400).json({ error: 'Invalid file path' });
         }
         
@@ -467,7 +467,7 @@ app.post('/api/validate/archive', authenticateToken, upload.single('archive'), a
         const uploadDir = path.resolve(CONFIG.UPLOAD_DIR);
         const filePath = path.resolve(req.file.path);
         if (!filePath.startsWith(uploadDir)) {
-            await fs.unlink(req.file.path).catch(() => {});
+            await fs.unlink(filePath).catch(() => {});
             return res.status(400).json({ error: 'Invalid file path' });
         }
         
