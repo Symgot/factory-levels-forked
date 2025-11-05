@@ -1,0 +1,36 @@
+{
+  "name": "factorio-performance-optimizer",
+  "version": "8.0.0",
+  "description": "High-Performance Parser with Multi-Core Processing - Phase 8",
+  "main": "performance_engine.js",
+  "scripts": {
+    "start": "node performance_engine.js",
+    "benchmark": "node benchmark.js",
+    "test": "jest --coverage",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "factorio",
+    "performance",
+    "optimization",
+    "multi-core",
+    "streaming"
+  ],
+  "author": "Factory Levels Team",
+  "license": "MIT",
+  "dependencies": {
+    "worker_threads": "^1.0.0",
+    "lru-cache": "^10.1.0",
+    "streaming-json-stringify": "^3.1.0",
+    "piscina": "^4.2.1",
+    "nanobench": "^3.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.56.0",
+    "benchmark": "^2.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
