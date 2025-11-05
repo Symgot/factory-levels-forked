@@ -1,0 +1,72 @@
+{
+  "name": "factorio-mod-validator",
+  "displayName": "Factorio Mod Validator",
+  "description": "Real-time validation and IntelliSense for Factorio mod development",
+  "version": "1.0.0",
+  "publisher": "factorio-tools",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "activationEvents": [
+    "onLanguage:lua"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "factorio-validator.validateFile",
+        "title": "Factorio: Validate Current File"
+      },
+      {
+        "command": "factorio-validator.validateWorkspace",
+        "title": "Factorio: Validate Entire Mod"
+      },
+      {
+        "command": "factorio-validator.showMetrics",
+        "title": "Factorio: Show Code Metrics"
+      }
+    ],
+    "configuration": {
+      "title": "Factorio Mod Validator",
+      "properties": {
+        "factorio-validator.enableRealTimeValidation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable real-time validation while typing"
+        },
+        "factorio-validator.factorioVersion": {
+          "type": "string",
+          "default": "2.0",
+          "enum": ["1.1", "2.0"],
+          "description": "Target Factorio version for API validation"
+        },
+        "factorio-validator.showMetricsOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show code metrics after saving"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "factorio-validator.validateFile",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "editorTextFocus && editorLangId == lua"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "eslint": "^8.0.0"
+  }
+}

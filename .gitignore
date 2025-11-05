@@ -16,3 +16,13 @@ Thumbs.db
 tests/*.out
 tests/*.log
 tests/temp_*
+
+# Node.js dependencies
+node_modules/
+web_dashboard/node_modules/
+vscode_extension/node_modules/
+
+# Build outputs
+web_dashboard/build/
+vscode_extension/out/
+*.vsix
