@@ -1,0 +1,32 @@
+{
+  "name": "factorio-advanced-obfuscation",
+  "version": "8.0.0",
+  "description": "Control Flow Graph Based Obfuscation Analysis - Phase 8",
+  "main": "obfuscation_analyzer.js",
+  "scripts": {
+    "start": "node obfuscation_analyzer.js",
+    "test": "jest --coverage",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "factorio",
+    "obfuscation",
+    "deobfuscation",
+    "control-flow",
+    "reverse-engineering"
+  ],
+  "author": "Factory Levels Team",
+  "license": "MIT",
+  "dependencies": {
+    "graphlib": "^2.1.8",
+    "entropy-string": "^4.2.1",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "factorio-ml-pattern-recognition",
+  "version": "8.0.0",
+  "description": "Machine Learning Pattern Recognition for Factorio Mod Code Analysis - Phase 8",
+  "main": "ml_engine.js",
+  "scripts": {
+    "start": "node ml_engine.js",
+    "train": "node train_models.js",
+    "test": "jest --coverage",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "factorio",
+    "machine-learning",
+    "pattern-recognition",
+    "code-analysis",
+    "tensorflow"
+  ],
+  "author": "Factory Levels Team",
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^4.15.0",
+    "natural": "^6.10.4",
+    "mathjs": "^12.2.1",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
