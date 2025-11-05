@@ -31,6 +31,7 @@ native_zip.VERSION = {
 
 -- ============================================================================
 -- BITWISE OPERATIONS (Lua 5.4 Native)
+-- Note: Wrappers provided for code clarity and potential backward compatibility
 -- ============================================================================
 
 local function band(a, b) return a & b end

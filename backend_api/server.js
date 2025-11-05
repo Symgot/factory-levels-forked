@@ -26,9 +26,15 @@ const execPromise = util.promisify(exec);
 // CONFIGURATION
 // ============================================================================
 
+// Validate required environment variables in production
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+    console.error('ERROR: JWT_SECRET environment variable must be set in production');
+    process.exit(1);
+}
+
 const CONFIG = {
     PORT: process.env.PORT || 3001,
-    JWT_SECRET: process.env.JWT_SECRET || 'factorio-mod-validator-secret-key-change-in-production',
+    JWT_SECRET: process.env.JWT_SECRET || 'dev-secret-DO-NOT-USE-IN-PRODUCTION',
     JWT_EXPIRES_IN: '24h',
     UPLOAD_DIR: process.env.UPLOAD_DIR || './uploads',
     MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
@@ -157,15 +163,22 @@ const users = new Map();
 const validationHistory = new Map();
 const apiKeys = new Map();
 
-// Default admin user
-const defaultAdminPassword = bcrypt.hashSync('admin123', 10);
-users.set('admin', {
-    username: 'admin',
-    password: defaultAdminPassword,
-    email: 'admin@example.com',
-    role: 'admin',
-    created_at: new Date().toISOString()
-});
+// Default admin user (for development only)
+// In production, create admin via registration or environment variable
+const defaultAdminPassword = process.env.ADMIN_PASSWORD 
+    ? bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10)
+    : bcrypt.hashSync('CHANGE-ME-' + Date.now(), 10);
+
+if (process.env.NODE_ENV !== 'production') {
+    users.set('admin', {
+        username: 'admin',
+        password: defaultAdminPassword,
+        email: 'admin@example.com',
+        role: 'admin',
+        created_at: new Date().toISOString()
+    });
+    console.log('⚠️  Development mode: Default admin user created');
+}
 
 // ============================================================================
 // VALIDATION FUNCTIONS
@@ -174,16 +187,39 @@ users.set('admin', {
 async function validateLuaFile(filePath) {
     try {
         const validatorPath = path.resolve(__dirname, CONFIG.LUA_VALIDATOR_PATH);
-        const command = `lua ${validatorPath} ${filePath}`;
         
-        const { stdout, stderr } = await execPromise(command);
+        // Security: Use spawn with array arguments to prevent command injection
+        const { spawn } = require('child_process');
         
-        return {
-            success: true,
-            valid: !stderr,
-            output: stdout,
-            errors: stderr || null
-        };
+        return new Promise((resolve, reject) => {
+            const luaProcess = spawn('lua', [validatorPath, filePath]);
+            let stdout = '';
+            let stderr = '';
+            
+            luaProcess.stdout.on('data', (data) => {
+                stdout += data.toString();
+            });
+            
+            luaProcess.stderr.on('data', (data) => {
+                stderr += data.toString();
+            });
+            
+            luaProcess.on('close', (code) => {
+                resolve({
+                    success: true,
+                    valid: code === 0 && !stderr,
+                    output: stdout,
+                    errors: stderr || null
+                });
+            });
+            
+            luaProcess.on('error', (error) => {
+                resolve({
+                    success: false,
+                    error: error.message
+                });
+            });
+        });
     } catch (error) {
         return {
             success: false,
@@ -195,16 +231,39 @@ async function validateLuaFile(filePath) {
 async function validateZipArchive(filePath) {
     try {
         const validatorPath = path.resolve(__dirname, CONFIG.LUA_VALIDATOR_PATH);
-        const command = `lua ${validatorPath} --archive ${filePath}`;
         
-        const { stdout, stderr } = await execPromise(command);
+        // Security: Use spawn with array arguments to prevent command injection
+        const { spawn } = require('child_process');
         
-        return {
-            success: true,
-            valid: !stderr,
-            output: stdout,
-            errors: stderr || null
-        };
+        return new Promise((resolve, reject) => {
+            const luaProcess = spawn('lua', [validatorPath, '--archive', filePath]);
+            let stdout = '';
+            let stderr = '';
+            
+            luaProcess.stdout.on('data', (data) => {
+                stdout += data.toString();
+            });
+            
+            luaProcess.stderr.on('data', (data) => {
+                stderr += data.toString();
+            });
+            
+            luaProcess.on('close', (code) => {
+                resolve({
+                    success: true,
+                    valid: code === 0 && !stderr,
+                    output: stdout,
+                    errors: stderr || null
+                });
+            });
+            
+            luaProcess.on('error', (error) => {
+                resolve({
+                    success: false,
+                    error: error.message
+                });
+            });
+        });
     } catch (error) {
         return {
             success: false,
