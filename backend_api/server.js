@@ -156,6 +156,37 @@ const authenticateToken = (req, res, next) => {
 };
 
 // ============================================================================
+// FILE PATH VALIDATION
+// ============================================================================
+
+/**
+ * Validates and sanitizes file paths to prevent path traversal attacks
+ * @param {string} userPath - Path from user input (e.g., req.file.path)
+ * @param {string} baseDir - Base directory that path must be within
+ * @returns {string|null} Sanitized absolute path, or null if invalid
+ */
+function validateFilePath(userPath, baseDir) {
+    try {
+        const resolvedBase = path.resolve(baseDir);
+        const resolvedPath = path.resolve(userPath);
+        
+        // Check path is within base directory
+        if (!resolvedPath.startsWith(resolvedBase + path.sep) && resolvedPath !== resolvedBase) {
+            return null;
+        }
+        
+        // Additional checks
+        if (resolvedPath.includes('..')) {
+            return null;
+        }
+        
+        return resolvedPath;
+    } catch (error) {
+        return null;
+    }
+}
+
+// ============================================================================
 // IN-MEMORY DATA STORES (Replace with database in production)
 // ============================================================================
 
@@ -422,16 +453,17 @@ app.get('/api/auth/profile', authenticateToken, (req, res) => {
 
 // Validate single Lua file
 app.post('/api/validate/file', authenticateToken, upload.single('file'), async (req, res) => {
+    let filePath = null;
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
         
-        // Security: Validate file path is within upload directory
-        const uploadDir = path.resolve(CONFIG.UPLOAD_DIR);
-        const filePath = path.resolve(req.file.path);
-        if (!filePath.startsWith(uploadDir)) {
-            await fs.unlink(filePath).catch(() => {});
+        // Security: Validate and sanitize file path
+        filePath = validateFilePath(req.file.path, CONFIG.UPLOAD_DIR);
+        if (!filePath) {
+            // Clean up with original path if validation fails
+            try { await fs.unlink(req.file.path); } catch (e) {}
             return res.status(400).json({ error: 'Invalid file path' });
         }
         
@@ -452,22 +484,26 @@ app.post('/api/validate/file', authenticateToken, upload.single('file'), async (
             validation: result
         });
     } catch (error) {
+        if (filePath) {
+            await fs.unlink(filePath).catch(() => {});
+        }
         res.status(500).json({ error: 'Validation failed', details: error.message });
     }
 });
 
 // Validate ZIP archive
 app.post('/api/validate/archive', authenticateToken, upload.single('archive'), async (req, res) => {
+    let filePath = null;
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No archive uploaded' });
         }
         
-        // Security: Validate file path is within upload directory
-        const uploadDir = path.resolve(CONFIG.UPLOAD_DIR);
-        const filePath = path.resolve(req.file.path);
-        if (!filePath.startsWith(uploadDir)) {
-            await fs.unlink(filePath).catch(() => {});
+        // Security: Validate and sanitize file path
+        filePath = validateFilePath(req.file.path, CONFIG.UPLOAD_DIR);
+        if (!filePath) {
+            // Clean up with original path if validation fails
+            try { await fs.unlink(req.file.path); } catch (e) {}
             return res.status(400).json({ error: 'Invalid file path' });
         }
         
@@ -488,6 +524,9 @@ app.post('/api/validate/archive', authenticateToken, upload.single('archive'), a
             validation: result
         });
     } catch (error) {
+        if (filePath) {
+            await fs.unlink(filePath).catch(() => {});
+        }
         res.status(500).json({ error: 'Validation failed', details: error.message });
     }
 });
