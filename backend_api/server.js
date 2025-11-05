@@ -427,7 +427,15 @@ app.post('/api/validate/file', authenticateToken, upload.single('file'), async (
             return res.status(400).json({ error: 'No file uploaded' });
         }
         
-        const result = await validateLuaFile(req.file.path);
+        // Security: Validate file path is within upload directory
+        const uploadDir = path.resolve(CONFIG.UPLOAD_DIR);
+        const filePath = path.resolve(req.file.path);
+        if (!filePath.startsWith(uploadDir)) {
+            await fs.unlink(req.file.path).catch(() => {});
+            return res.status(400).json({ error: 'Invalid file path' });
+        }
+        
+        const result = await validateLuaFile(filePath);
         
         // Save to history
         saveValidationResult(req.user.username, {
@@ -437,7 +445,7 @@ app.post('/api/validate/file', authenticateToken, upload.single('file'), async (
         });
         
         // Clean up uploaded file
-        await fs.unlink(req.file.path).catch(() => {});
+        await fs.unlink(filePath).catch(() => {});
         
         res.json({
             filename: req.file.originalname,
@@ -455,7 +463,15 @@ app.post('/api/validate/archive', authenticateToken, upload.single('archive'), a
             return res.status(400).json({ error: 'No archive uploaded' });
         }
         
-        const result = await validateZipArchive(req.file.path);
+        // Security: Validate file path is within upload directory
+        const uploadDir = path.resolve(CONFIG.UPLOAD_DIR);
+        const filePath = path.resolve(req.file.path);
+        if (!filePath.startsWith(uploadDir)) {
+            await fs.unlink(req.file.path).catch(() => {});
+            return res.status(400).json({ error: 'Invalid file path' });
+        }
+        
+        const result = await validateZipArchive(filePath);
         
         // Save to history
         saveValidationResult(req.user.username, {
@@ -465,7 +481,7 @@ app.post('/api/validate/archive', authenticateToken, upload.single('archive'), a
         });
         
         // Clean up uploaded file
-        await fs.unlink(req.file.path).catch(() => {});
+        await fs.unlink(filePath).catch(() => {});
         
         res.json({
             filename: req.file.originalname,
