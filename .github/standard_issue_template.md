@@ -69,6 +69,15 @@ assignees: []
 - [ ] Problem/Feature ist klar beschrieben und reproduzierbar.
 - [ ] Keine sensiblen/privaten Quellen ohne Berechtigungsangabe verlinkt.
 
+#### Anweisungen für GitHub Coding Agent
+
+**CRITICAL:** Der GitHub Coding Agent MUSS die `copilot-instructions.md` befolgen und:
+
+1. **ALLE Aufgaben vollständig integrieren**: Alle genannten Aufgaben vollständig integrieren
+2. **Eigenständigen Abgleich durchführen**: Automatische Validierung gegen offizielle API
+3. **Universelle Einsetzbarkeit sicherstellen**: Mock-System muss für jegliche Mod verwendbar sein
+4. **Branch verwenden**: Alle Änderungen im korrekten Branch durchführen
+
 ### Workflow-Hinweis
 
 - Nach der Issue-Erstellung wird ein Basis-PR erstellt.
