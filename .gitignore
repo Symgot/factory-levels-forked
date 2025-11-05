@@ -21,6 +21,11 @@ tests/temp_*
 node_modules/
 web_dashboard/node_modules/
 vscode_extension/node_modules/
+backend_api/node_modules/
+lsp_server/node_modules/
+backend_api/uploads/
+backend_api/.env
+lsp_server/.env
 
 # Build outputs
 web_dashboard/build/
