@@ -1,0 +1,24 @@
+{
+  "name": "matrix-strategy",
+  "version": "9.0.0",
+  "description": "Intelligent Matrix Strategy for Parallel CI/CD - Phase 9",
+  "main": "matrix_generator.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "keywords": [
+    "matrix",
+    "parallel",
+    "ci-cd",
+    "github-actions"
+  ],
+  "author": "Factory Levels Team",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "winston": "^3.11.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

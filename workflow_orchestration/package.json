@@ -1,0 +1,37 @@
+{
+  "name": "workflow-orchestration",
+  "version": "9.0.0",
+  "description": "GitHub Actions Workflow Orchestration Engine - Phase 9",
+  "main": "supervisor.js",
+  "scripts": {
+    "start": "node supervisor.js",
+    "test": "jest --coverage",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "github-actions",
+    "workflow",
+    "orchestration",
+    "ci-cd",
+    "runner-management"
+  ],
+  "author": "Factory Levels Team",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "@octokit/auth-app": "^6.0.3",
+    "axios": "^1.6.0",
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1",
+    "node-cron": "^3.0.3",
+    "p-queue": "^7.4.1",
+    "p-retry": "^6.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
