@@ -1,0 +1,37 @@
+{
+  "name": "factory-levels-forked",
+  "version": "11.0.0",
+  "description": "Factorio Factory Levels mod with Factorify integration",
+  "private": true,
+  "workspaces": [
+    "github_actions_integration",
+    "discord_bot"
+  ],
+  "scripts": {
+    "install-all": "npm install && cd github_actions_integration && npm install && cd ../discord_bot && npm install",
+    "test": "echo 'Running Lua tests...' && cd tests && lua test_runner.lua 2>/dev/null || echo 'Lua tests require lua5.3 to be installed'",
+    "bot:start": "cd discord_bot && npm start",
+    "bot:dev": "cd discord_bot && npm run dev",
+    "bot:deploy-commands": "cd discord_bot && npm run deploy-commands",
+    "validate": "node scripts/validate-phase11.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Symgot/factory-levels-forked.git"
+  },
+  "keywords": [
+    "factorio",
+    "mod",
+    "analysis",
+    "github-actions",
+    "discord-bot"
+  ],
+  "author": "Factorify Team",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.55.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

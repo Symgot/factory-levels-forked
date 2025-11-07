@@ -1,0 +1,23 @@
+{
+  "name": "@factorify/github-actions-integration",
+  "version": "1.0.0",
+  "description": "GitHub Actions native integration without external servers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "github-actions",
+    "workflow-dispatch",
+    "runner-coordination",
+    "status-tracking"
+  ],
+  "author": "Factorify Team",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^20.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@factorify/discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for Factorio mod analysis with GitHub Actions integration",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js",
+    "deploy-commands": "node deploy-commands.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "discord",
+    "factorio",
+    "mod-analysis",
+    "github-actions",
+    "ticket-system"
+  ],
+  "author": "Factorify Team",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "axios": "^1.6.2",
+    "adm-zip": "^0.5.10",
+    "tar-stream": "^3.1.6",
+    "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
