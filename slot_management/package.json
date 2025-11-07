@@ -1,0 +1,25 @@
+{
+  "name": "slot-management",
+  "version": "9.0.0",
+  "description": "GitHub Runner Slot Optimization & Management - Phase 9",
+  "main": "slot_optimizer.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "keywords": [
+    "github-actions",
+    "runner",
+    "slot-management",
+    "optimization"
+  ],
+  "author": "Factory Levels Team",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "winston": "^3.11.0",
+    "node-cron": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

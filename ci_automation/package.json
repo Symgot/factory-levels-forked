@@ -1,0 +1,24 @@
+{
+  "name": "ci-automation",
+  "version": "9.0.0",
+  "description": "CI/CD Pipeline Automation with Phase 8 Integration - Phase 9",
+  "main": "pipeline_orchestrator.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "keywords": [
+    "ci-cd",
+    "automation",
+    "pipeline",
+    "github-actions"
+  ],
+  "author": "Factory Levels Team",
+  "license": "MIT",
+  "dependencies": {
+    "winston": "^3.11.0",
+    "axios": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
