@@ -19,6 +19,19 @@ class WorkflowDispatcher {
    * @returns {Promise<object>} - Response from GitHub API
    */
   async triggerWorkflow(workflowId, inputs = {}, ref = 'main') {
+    // Validate inputs
+    if (!workflowId || typeof workflowId !== 'string') {
+      throw new Error('workflowId must be a non-empty string');
+    }
+    
+    if (typeof inputs !== 'object' || inputs === null) {
+      throw new Error('inputs must be an object');
+    }
+    
+    if (!ref || typeof ref !== 'string') {
+      throw new Error('ref must be a non-empty string');
+    }
+
     try {
       const response = await this.octokit.rest.actions.createWorkflowDispatch({
         owner: this.owner,

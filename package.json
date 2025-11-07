@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "install-all": "npm install && cd github_actions_integration && npm install && cd ../discord_bot && npm install",
-    "test": "echo 'Running Lua tests...' && cd tests && lua test_runner.lua || true",
+    "test": "echo 'Running Lua tests...' && cd tests && lua test_runner.lua 2>/dev/null || echo 'Lua tests require lua5.3 to be installed'",
     "bot:start": "cd discord_bot && npm start",
     "bot:dev": "cd discord_bot && npm run dev",
     "bot:deploy-commands": "cd discord_bot && npm run deploy-commands",

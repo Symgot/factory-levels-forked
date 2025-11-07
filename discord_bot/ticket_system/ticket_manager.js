@@ -6,6 +6,10 @@ const TICKETS_FILE = path.join(__dirname, '../../data/tickets.json');
 const TICKET_CATEGORY_NAME = 'Factorify Tickets';
 const AUTO_CLOSE_DAYS = 7;
 
+// TODO: For production, migrate to a proper database (MongoDB/PostgreSQL)
+// JSON storage is suitable for development and small-scale deployments only
+// Consider implementing a database abstraction layer for scalability
+
 function ensureDataDirectory() {
   const dataDir = path.join(__dirname, '../../data');
   if (!fs.existsSync(dataDir)) {

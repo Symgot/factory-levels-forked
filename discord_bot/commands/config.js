@@ -76,11 +76,14 @@ module.exports = {
           return;
         }
 
+        // Note: This modifies process.env temporarily and will not persist across restarts
+        // For production, use a proper configuration management system or environment files
         process.env.DISCORD_WEBHOOK_URL = webhookUrl;
 
         await interaction.editReply({
           content: '✅ Webhook URL configured successfully.\n\n' +
-                   '⚠️ **Note**: This setting is temporary. Add `DISCORD_WEBHOOK_URL` to your environment variables for persistence.'
+                   '⚠️ **Important**: This setting is temporary and will not persist after bot restart.\n' +
+                   'Add `DISCORD_WEBHOOK_URL` to your environment variables for persistence.'
         });
       }
     } catch (error) {

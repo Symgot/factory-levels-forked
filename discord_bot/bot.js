@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Collection, ActivityType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -55,7 +55,7 @@ class FactorifyBot {
       console.log(`[Bot] Logged in as ${this.client.user.tag}`);
       console.log(`[Bot] Serving ${this.client.guilds.cache.size} guilds`);
       
-      this.client.user.setActivity('Factorio mods', { type: 'WATCHING' });
+      this.client.user.setActivity('Factorio mods', { type: ActivityType.Watching });
     });
 
     this.client.on('interactionCreate', async interaction => {
