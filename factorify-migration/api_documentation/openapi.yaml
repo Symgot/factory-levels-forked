@@ -1,0 +1,510 @@
+openapi: 3.1.0
+info:
+  title: Factorify API
+  version: 1.0.0
+  description: |
+    Cross-Repository API for Factorio Mod Analysis, providing ML-based pattern recognition,
+    performance optimization, and security scanning capabilities.
+  contact:
+    name: Factorify Support
+    url: https://github.com/Symgot/Factorify
+    email: support@factorify.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.factorify.dev
+    description: Production server
+  - url: https://staging-api.factorify.dev
+    description: Staging server
+  - url: http://localhost:3000
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/analyze/mod:
+    post:
+      summary: Analyze a Factorio mod
+      description: Submit a mod for comprehensive analysis including ML, performance, and security checks
+      operationId: analyzeMod
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModAnalysisRequest'
+            examples:
+              fullAnalysis:
+                summary: Full analysis with all features
+                value:
+                  repository: "user/my-factorio-mod"
+                  type: "full"
+                  options:
+                    ml: true
+                    performance: true
+                    obfuscation: true
+                    priority: "high"
+      responses:
+        '202':
+          description: Analysis job queued successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisJobResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/status/{jobId}:
+    get:
+      summary: Get job status
+      description: Check the status and results of an analysis job
+      operationId: getJobStatus
+      tags:
+        - Analysis
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job identifier
+      responses:
+        '200':
+          description: Job status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/ml/predict:
+    post:
+      summary: ML pattern recognition
+      description: Run ML-based pattern recognition on Lua code
+      operationId: mlPredict
+      tags:
+        - Machine Learning
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MLPredictionRequest'
+      responses:
+        '200':
+          description: ML prediction successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MLPredictionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/performance/benchmark:
+    post:
+      summary: Performance benchmark
+      description: Run performance benchmarks on Lua code
+      operationId: performanceBenchmark
+      tags:
+        - Performance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformanceBenchmarkRequest'
+      responses:
+        '200':
+          description: Benchmark completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceBenchmarkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/obfuscation/detect:
+    post:
+      summary: Obfuscation detection
+      description: Detect code obfuscation techniques and measure obfuscation level
+      operationId: detectObfuscation
+      tags:
+        - Security
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObfuscationDetectionRequest'
+      responses:
+        '200':
+          description: Obfuscation analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObfuscationDetectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/health:
+    get:
+      summary: Health check
+      description: Check API health status and service availability
+      operationId: healthCheck
+      tags:
+        - System
+      security: []
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: API is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token authentication
+
+  schemas:
+    ModAnalysisRequest:
+      type: object
+      properties:
+        repository:
+          type: string
+          description: GitHub repository (owner/repo)
+          example: "user/my-factorio-mod"
+        url:
+          type: string
+          format: uri
+          description: Direct URL to file
+        type:
+          type: string
+          enum: [full, syntax, ml, performance, security]
+          default: full
+        options:
+          $ref: '#/components/schemas/AnalysisOptions'
+
+    AnalysisOptions:
+      type: object
+      properties:
+        ml:
+          type: boolean
+          default: true
+        performance:
+          type: boolean
+          default: true
+        obfuscation:
+          type: boolean
+          default: true
+        timeout:
+          type: integer
+          default: 300000
+          description: Timeout in milliseconds
+        priority:
+          type: string
+          enum: [critical, high, normal, low]
+          default: normal
+
+    AnalysisJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued]
+        statusUrl:
+          type: string
+        estimatedTime:
+          type: string
+        message:
+          type: string
+
+    JobStatus:
+      type: object:
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        result:
+          $ref: '#/components/schemas/AnalysisResult'
+        error:
+          type: string
+
+    AnalysisResult:
+      type: object
+      properties:
+        ml:
+          $ref: '#/components/schemas/MLResult'
+        performance:
+          $ref: '#/components/schemas/PerformanceResult'
+        obfuscation:
+          $ref: '#/components/schemas/ObfuscationResult'
+        quality:
+          type: number
+          minimum: 0
+          maximum: 100
+        timestamp:
+          type: string
+          format: date-time
+
+    MLPredictionRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        modelType:
+          type: string
+          enum: [pattern_recognition, anomaly_detection, quality_prediction]
+          default: pattern_recognition
+
+    MLPredictionResponse:
+      type: object
+      properties:
+        modelType:
+          type: string
+        result:
+          $ref: '#/components/schemas/MLResult'
+        inferenceTime:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+
+    MLResult:
+      type: object
+      properties:
+        predictedClass:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        features:
+          type: array
+          items:
+            type: number
+
+    PerformanceBenchmarkRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        benchmarkType:
+          type: string
+          enum: [parse, execute, memory]
+          default: parse
+        iterations:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+
+    PerformanceBenchmarkResponse:
+      type: object
+      properties:
+        benchmarkType:
+          type: string
+        iterations:
+          type: integer
+        result:
+          $ref: '#/components/schemas/PerformanceResult'
+        timestamp:
+          type: string
+          format: date-time
+
+    PerformanceResult:
+      type: object
+      properties:
+        mean:
+          type: number
+        median:
+          type: number
+        p95:
+          type: number
+        p99:
+          type: number
+        min:
+          type: number
+        max:
+          type: number
+        stdDev:
+          type: number
+
+    ObfuscationDetectionRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        detailed:
+          type: boolean
+          default: false
+
+    ObfuscationDetectionResponse:
+      type: object
+      properties:
+        obfuscationScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        isObfuscated:
+          type: boolean
+        confidence:
+          type: number
+        techniques:
+          type: array
+          items:
+            type: string
+        cfgMetrics:
+          type: object
+        entropyAnalysis:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    ObfuscationResult:
+      type: object
+      properties:
+        score:
+          type: number
+        isObfuscated:
+          type: boolean
+        confidence:
+          type: number
+        techniques:
+          type: array
+          items:
+            type: string
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        services:
+          type: object
+        uptime:
+          type: number
+        memory:
+          type: object
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Analysis
+    description: Mod analysis operations
+  - name: Machine Learning
+    description: ML pattern recognition
+  - name: Performance
+    description: Performance benchmarking
+  - name: Security
+    description: Security and obfuscation detection
+  - name: System
+    description: System status and health

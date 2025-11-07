@@ -1,0 +1,183 @@
+name: Factorify Security Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Scan type (quick, full, deep)'
+        required: false
+        default: 'full'
+      api_endpoint:
+        description: 'Factorify API endpoint'
+        required: false
+        default: 'https://api.factorify.dev'
+  schedule:
+    - cron: '0 2 * * 1'
+  push:
+    branches:
+      - main
+    paths:
+      - '**.lua'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Obfuscation Analysis
+        id: obfuscation
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          SCAN_TYPE="${{ inputs.scan_type || 'full' }}"
+          
+          echo "Running obfuscation analysis..."
+          
+          OBFUSCATED_FILES=""
+          HIGH_RISK_COUNT=0
+          
+          for lua_file in $(find . -name "*.lua"); do
+            CODE=$(cat "$lua_file" | jq -Rs .)
+            
+            RESULT=$(curl -s -X POST "$API_ENDPOINT/api/v1/obfuscation/detect" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"code\":$CODE,\"detailed\":true}")
+            
+            SCORE=$(echo "$RESULT" | jq -r '.obfuscationScore')
+            IS_OBFUSCATED=$(echo "$RESULT" | jq -r '.isObfuscated')
+            
+            if [ "$IS_OBFUSCATED" == "true" ]; then
+              echo "⚠️ Obfuscation detected: $lua_file (score: $SCORE)"
+              OBFUSCATED_FILES="$OBFUSCATED_FILES\n- $lua_file (score: $SCORE)"
+              
+              if [ $(echo "$SCORE > 70" | bc -l) -eq 1 ]; then
+                HIGH_RISK_COUNT=$((HIGH_RISK_COUNT + 1))
+              fi
+            fi
+          done
+          
+          echo "obfuscated_files<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$OBFUSCATED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "high_risk_count=$HIGH_RISK_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Secret Detection
+        id: secrets
+        run: |
+          echo "Scanning for hardcoded secrets..."
+          
+          SECRET_PATTERNS='github_pat|ghp_|gho_|ghs_|api[_-]?key|password|secret|token'
+          FOUND_SECRETS=$(grep -rniE "$SECRET_PATTERNS" --include="*.lua" . || true)
+          
+          if [ -n "$FOUND_SECRETS" ]; then
+            echo "⚠️ Potential secrets found:"
+            echo "$FOUND_SECRETS"
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No secrets detected"
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Unsafe Pattern Detection
+        run: |
+          echo "Checking for unsafe patterns..."
+          
+          UNSAFE_PATTERNS='loadstring|load\(|os\.execute|io\.popen|debug\.'
+          FOUND_UNSAFE=$(grep -rniE "$UNSAFE_PATTERNS" --include="*.lua" . || true)
+          
+          if [ -n "$FOUND_UNSAFE" ]; then
+            echo "⚠️ Potentially unsafe patterns found:"
+            echo "$FOUND_UNSAFE"
+          else
+            echo "✅ No unsafe patterns detected"
+          fi
+
+      - name: Dependency Audit
+        if: ${{ inputs.scan_type == 'deep' }}
+        run: |
+          echo "Auditing dependencies..."
+          
+          if [ -f "package.json" ]; then
+            npm audit --json > npm-audit.json || true
+            
+            VULNERABILITIES=$(jq '.metadata.vulnerabilities' npm-audit.json)
+            echo "Found vulnerabilities: $VULNERABILITIES"
+          else
+            echo "No package.json found, skipping npm audit"
+          fi
+
+      - name: CFG Complexity Analysis
+        if: ${{ inputs.scan_type != 'quick' }}
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          
+          echo "Analyzing code complexity..."
+          
+          for lua_file in $(find . -name "*.lua" -size +1k); do
+            CODE=$(cat "$lua_file" | jq -Rs .)
+            
+            RESULT=$(curl -s -X POST "$API_ENDPOINT/api/v1/obfuscation/detect" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"code\":$CODE,\"detailed\":true}")
+            
+            COMPLEXITY=$(echo "$RESULT" | jq -r '.cfgMetrics.cyclomaticComplexity // 0')
+            
+            if [ $(echo "$COMPLEXITY > 20" | bc -l) -eq 1 ]; then
+              echo "⚠️ High complexity in $lua_file: $COMPLEXITY"
+            fi
+          done
+
+      - name: Generate Security Report
+        if: always()
+        run: |
+          echo "## Factorify Security Scan Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Type**: ${{ inputs.scan_type || 'full' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Obfuscation Analysis" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -n "${{ steps.obfuscation.outputs.obfuscated_files }}" ]; then
+            echo "**Status**: ⚠️ Obfuscation detected" >> $GITHUB_STEP_SUMMARY
+            echo "**High Risk Files**: ${{ steps.obfuscation.outputs.high_risk_count }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Affected Files**:" >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.obfuscation.outputs.obfuscated_files }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status**: ✅ No obfuscation detected" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Secret Detection" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.secrets.outputs.found }}" == "true" ]; then
+            echo "**Status**: ⚠️ Potential secrets found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status**: ✅ No secrets detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail on High Risk
+        if: ${{ steps.obfuscation.outputs.high_risk_count > 0 }}
+        run: |
+          echo "❌ High-risk obfuscation detected in ${{ steps.obfuscation.outputs.high_risk_count }} file(s)"
+          exit 1
+
+      - name: Upload Security Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: factorify-security-results
+          path: |
+            *.json
+            *.log
+          retention-days: 30
