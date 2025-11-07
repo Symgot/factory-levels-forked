@@ -329,7 +329,8 @@ router.post('/api/v1/workflow/trigger', validateToken, checkRateLimit, async (re
 });
 
 async function getJobStatus(jobId) {
-    return null;
+    const { getJob } = require('../distributed_orchestration/queue_manager');
+    return await getJob(jobId);
 }
 
 async function checkMLHealth() {
@@ -360,7 +361,16 @@ async function checkObfuscationHealth() {
 }
 
 async function checkQueueHealth() {
-    return { status: 'healthy', pendingJobs: 0 };
+    try {
+        const { getQueueMetrics } = require('../distributed_orchestration/queue_manager');
+        const metrics = await getQueueMetrics();
+        return {
+            status: metrics.queueSize < 500 ? 'healthy' : 'degraded',
+            pendingJobs: metrics.queueSize
+        };
+    } catch (error) {
+        return { status: 'unhealthy', pendingJobs: 0, error: error.message };
+    }
 }
 
 module.exports = router;

@@ -307,7 +307,18 @@ const schema = new GraphQLSchema({
 });
 
 async function fetchCodeFromUrl(url) {
-    return `local function example() return true end`;
+    try {
+        const axios = require('axios');
+        const response = await axios.get(url, {
+            headers: {
+                'Accept': 'application/vnd.github.v3.raw',
+                'User-Agent': 'Factorify-API/1.0'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(`Failed to fetch code from ${url}: ${error.message}`);
+    }
 }
 
 function calculateQualityScore(results) {

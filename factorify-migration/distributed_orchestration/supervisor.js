@@ -1,7 +1,7 @@
 const { Octokit } = require('@octokit/rest');
 const EventEmitter = require('events');
-const { enqueueJob, dequeueJob, getQueueMetrics } = require('./queue_manager');
-const { getAvailableWorkers, registerWorker, unregisterWorker } = require('./worker_pool');
+const { enqueueJob, getJobStatus } = require('./queue_manager');
+const { getAvailableWorkers, registerWorker } = require('./worker_pool');
 
 class MultiRepoSupervisor extends EventEmitter {
     constructor(config = {}) {
@@ -76,6 +76,7 @@ class MultiRepoSupervisor extends EventEmitter {
 
         this.repositories.delete(repoKey);
 
+        const { unregisterWorker } = require('./worker_pool');
         await unregisterWorker(repoKey);
 
         console.log(`Repository ${repoKey} unregistered successfully`);
@@ -196,6 +197,7 @@ class MultiRepoSupervisor extends EventEmitter {
 
     async processQueue() {
         const workers = await getAvailableWorkers();
+        const { dequeueJob } = require('./queue_manager');
         const availableSlots = workers.reduce((sum, w) => sum + (w.maxConcurrentJobs - (w.activeJobs || 0)), 0);
 
         if (availableSlots === 0) {
@@ -219,6 +221,7 @@ class MultiRepoSupervisor extends EventEmitter {
 
     async checkWorkerHealth() {
         const workers = await getAvailableWorkers();
+        const { unregisterWorker } = require('./worker_pool');
 
         for (const worker of workers) {
             if (worker.status === 'unhealthy' || worker.lastHeartbeat < Date.now() - 300000) {
@@ -229,6 +232,7 @@ class MultiRepoSupervisor extends EventEmitter {
     }
 
     async emitMetrics() {
+        const { getQueueMetrics } = require('./queue_manager');
         const queueMetrics = await getQueueMetrics();
         const workers = await getAvailableWorkers();
 
