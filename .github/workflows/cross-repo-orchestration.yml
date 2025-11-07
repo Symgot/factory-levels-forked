@@ -1,0 +1,69 @@
+name: Cross-Repository Mod Orchestration
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod_path:
+        description: 'Path to mod directory'
+        required: true
+        type: string
+      run_validation:
+        description: 'Run validation'
+        required: false
+        type: boolean
+        default: true
+      run_security:
+        description: 'Run security scan'
+        required: false
+        type: boolean
+        default: true
+      run_benchmark:
+        description: 'Run performance benchmark'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  validation:
+    if: inputs.run_validation
+    uses: ./.github/workflows/reusable-mod-validation.yml
+    with:
+      mod_path: ${{ inputs.mod_path }}
+      validation_level: 'standard'
+
+  security:
+    if: inputs.run_security
+    uses: ./.github/workflows/reusable-security-scan.yml
+    with:
+      mod_path: ${{ inputs.mod_path }}
+      scan_depth: 'deep'
+
+  benchmark:
+    if: inputs.run_benchmark
+    uses: ./.github/workflows/reusable-performance-benchmark.yml
+    with:
+      mod_path: ${{ inputs.mod_path }}
+      benchmark_type: 'runtime'
+
+  summary:
+    needs: [validation, security, benchmark]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate orchestration summary
+        run: |
+          echo "# Mod Orchestration Summary" > summary.md
+          echo "" >> summary.md
+          echo "**Mod Path:** ${{ inputs.mod_path }}" >> summary.md
+          echo "**Date:** $(date)" >> summary.md
+          echo "" >> summary.md
+          echo "## Results" >> summary.md
+          echo "- Validation: ${{ needs.validation.result }}" >> summary.md
+          echo "- Security: ${{ needs.security.result }}" >> summary.md
+          echo "- Benchmark: ${{ needs.benchmark.result }}" >> summary.md
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: orchestration-summary
+          path: summary.md

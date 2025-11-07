@@ -1,0 +1,97 @@
+name: Mod Analysis Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_url:
+        description: 'URL of the mod archive'
+        required: true
+        type: string
+      file_name:
+        description: 'Name of the mod file'
+        required: true
+        type: string
+      ticket_id:
+        description: 'Discord ticket channel ID'
+        required: true
+        type: string
+      user_id:
+        description: 'Discord user ID'
+        required: true
+        type: string
+
+jobs:
+  analyze-mod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Download mod archive
+        run: |
+          wget -O mod.zip "${{ inputs.file_url }}"
+          
+      - name: Extract and analyze
+        run: |
+          unzip -q mod.zip -d mod_extracted
+          echo "## Mod Analysis Results" > analysis_result.md
+          echo "" >> analysis_result.md
+          echo "**File:** ${{ inputs.file_name }}" >> analysis_result.md
+          echo "**Analyzed:** $(date)" >> analysis_result.md
+          echo "" >> analysis_result.md
+          
+          find mod_extracted -name "*.lua" -type f > lua_files.txt
+          echo "**Lua files found:** $(wc -l < lua_files.txt)" >> analysis_result.md
+          echo "" >> analysis_result.md
+          
+          if [ -f "mod_extracted/info.json" ]; then
+            echo "### Mod Info" >> analysis_result.md
+            echo '```json' >> analysis_result.md
+            cat mod_extracted/info.json >> analysis_result.md
+            echo '```' >> analysis_result.md
+          fi
+          
+          echo "" >> analysis_result.md
+          echo "### File Structure" >> analysis_result.md
+          echo '```' >> analysis_result.md
+          tree mod_extracted -L 2 || find mod_extracted -type f >> analysis_result.md
+          echo '```' >> analysis_result.md
+
+      - name: Run validation checks
+        run: |
+          echo "" >> analysis_result.md
+          echo "### Validation Status" >> analysis_result.md
+          
+          if [ -f "mod_extracted/info.json" ]; then
+            echo "✅ info.json found" >> analysis_result.md
+          else
+            echo "❌ info.json missing" >> analysis_result.md
+          fi
+          
+          if [ -f "mod_extracted/data.lua" ] || [ -f "mod_extracted/data-updates.lua" ]; then
+            echo "✅ Data stage files found" >> analysis_result.md
+          else
+            echo "⚠️  No data stage files detected" >> analysis_result.md
+          fi
+
+      - name: Post results to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          RESULT=$(cat analysis_result.md)
+          curl -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"<@${{ inputs.user_id }}> Analysis complete for \`${{ inputs.file_name }}\`\", \"embeds\": [{\"description\": \"$RESULT\", \"color\": 5814783}]}"
+
+      - name: Upload analysis artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mod-analysis-${{ inputs.ticket_id }}
+          path: |
+            analysis_result.md
+            mod_extracted/

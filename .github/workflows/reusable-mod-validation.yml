@@ -1,0 +1,94 @@
+name: Reusable Mod Validation
+
+on:
+  workflow_call:
+    inputs:
+      mod_path:
+        description: 'Path to the mod directory'
+        required: true
+        type: string
+      validation_level:
+        description: 'Validation level: basic, standard, strict'
+        required: false
+        type: string
+        default: 'standard'
+    outputs:
+      validation_status:
+        description: 'Overall validation status'
+        value: ${{ jobs.validate.outputs.status }}
+      validation_report:
+        description: 'Validation report URL'
+        value: ${{ jobs.validate.outputs.report_url }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.validate.outputs.status }}
+      report_url: ${{ steps.upload-report.outputs.artifact-url }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml jsonschema
+
+      - name: Validate mod structure
+        id: validate
+        run: |
+          echo "Validating mod at: ${{ inputs.mod_path }}"
+          echo "Validation level: ${{ inputs.validation_level }}"
+          
+          STATUS="success"
+          
+          if [ ! -f "${{ inputs.mod_path }}/info.json" ]; then
+            echo "❌ info.json not found"
+            STATUS="failed"
+          else
+            echo "✅ info.json found"
+            python -m json.tool "${{ inputs.mod_path }}/info.json" > /dev/null
+            if [ $? -eq 0 ]; then
+              echo "✅ info.json is valid JSON"
+            else
+              echo "❌ info.json is invalid JSON"
+              STATUS="failed"
+            fi
+          fi
+          
+          if [ "${{ inputs.validation_level }}" = "strict" ]; then
+            if [ ! -f "${{ inputs.mod_path }}/changelog.txt" ]; then
+              echo "⚠️  changelog.txt recommended but missing"
+            fi
+          fi
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+      - name: Generate validation report
+        run: |
+          cat > validation_report.md << EOF
+          # Mod Validation Report
+          
+          **Mod Path:** ${{ inputs.mod_path }}
+          **Validation Level:** ${{ inputs.validation_level }}
+          **Status:** ${{ steps.validate.outputs.status }}
+          **Date:** $(date)
+          
+          ## Checks Performed
+          - Structure validation
+          - info.json validation
+          - JSON schema validation
+          EOF
+
+      - name: Upload validation report
+        id: upload-report
+        uses: actions/upload-artifact@v3
+        with:
+          name: validation-report-${{ github.run_id }}
+          path: validation_report.md

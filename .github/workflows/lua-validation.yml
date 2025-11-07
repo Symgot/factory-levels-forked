@@ -1,0 +1,99 @@
+name: Lua Validation Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_url:
+        description: 'URL of the Lua file'
+        required: true
+        type: string
+      file_name:
+        description: 'Name of the Lua file'
+        required: true
+        type: string
+      ticket_id:
+        description: 'Discord ticket channel ID'
+        required: true
+        type: string
+      user_id:
+        description: 'Discord user ID'
+        required: true
+        type: string
+
+jobs:
+  validate-lua:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Lua and luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 luarocks
+          sudo luarocks install luacheck
+
+      - name: Download Lua file
+        run: |
+          wget -O script.lua "${{ inputs.file_url }}"
+
+      - name: Syntax validation
+        id: syntax
+        run: |
+          echo "## Lua Validation Results" > validation_result.md
+          echo "" >> validation_result.md
+          echo "**File:** ${{ inputs.file_name }}" >> validation_result.md
+          echo "**Validated:** $(date)" >> validation_result.md
+          echo "" >> validation_result.md
+          echo "### Syntax Check" >> validation_result.md
+          
+          if lua5.3 -e "assert(loadfile('script.lua'))" 2>&1 | tee syntax_check.txt; then
+            echo "✅ Syntax valid" >> validation_result.md
+          else
+            echo "❌ Syntax errors detected:" >> validation_result.md
+            echo '```' >> validation_result.md
+            cat syntax_check.txt >> validation_result.md
+            echo '```' >> validation_result.md
+          fi
+
+      - name: Static analysis with luacheck
+        run: |
+          echo "" >> validation_result.md
+          echo "### Static Analysis (luacheck)" >> validation_result.md
+          echo '```' >> validation_result.md
+          luacheck script.lua --no-color || true >> validation_result.md
+          echo '```' >> validation_result.md
+
+      - name: Pattern detection
+        run: |
+          echo "" >> validation_result.md
+          echo "### Pattern Detection" >> validation_result.md
+          
+          if grep -q "data:extend" script.lua; then
+            echo "✅ Factorio data extension detected" >> validation_result.md
+          fi
+          
+          if grep -q "require(" script.lua; then
+            echo "ℹ️  Module imports found" >> validation_result.md
+          fi
+          
+          if grep -q "remote.call" script.lua; then
+            echo "ℹ️  Remote interface calls detected" >> validation_result.md
+          fi
+
+      - name: Post results to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          RESULT=$(cat validation_result.md)
+          curl -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"<@${{ inputs.user_id }}> Validation complete for \`${{ inputs.file_name }}\`\", \"embeds\": [{\"description\": \"$RESULT\", \"color\": 3447003}]}"
+
+      - name: Upload validation artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: lua-validation-${{ inputs.ticket_id }}
+          path: |
+            validation_result.md
+            script.lua
