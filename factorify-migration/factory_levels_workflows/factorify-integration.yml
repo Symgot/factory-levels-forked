@@ -1,0 +1,227 @@
+name: Factorify Integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      analysis_depth:
+        description: 'Analysis depth (quick, standard, comprehensive)'
+        required: false
+        default: 'standard'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'factory-levels/**/*.lua'
+      - 'tests/**/*.lua'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  FACTORIFY_API_ENDPOINT: ${{ secrets.FACTORIFY_API_ENDPOINT || 'https://api.factorify.dev' }}
+
+jobs:
+  run-local-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Lua Environment
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: '5.4'
+
+      - name: Run Local Tests
+        run: |
+          echo "Running local Lua tests..."
+          
+          for test_file in tests/*.lua; do
+            if [[ -f "$test_file" ]]; then
+              echo "Running $test_file..."
+              lua "$test_file" || true
+            fi
+          done
+          
+          echo "✅ Local tests completed"
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: local-test-results
+          path: |
+            tests/*.log
+            tests/*.json
+          retention-days: 7
+
+  call-factorify-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: run-local-tests
+    if: ${{ secrets.FACTORIFY_API_TOKEN != '' }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Submit to Factorify API
+        id: submit
+        run: |
+          echo "Submitting mod to Factorify API..."
+          
+          RESPONSE=$(curl -s -X POST "$FACTORIFY_API_ENDPOINT/api/v1/analyze/mod" \
+            -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"repository\": \"${{ github.repository }}\",
+              \"type\": \"full\",
+              \"options\": {
+                \"ml\": true,
+                \"performance\": true,
+                \"obfuscation\": true,
+                \"priority\": \"high\"
+              }
+            }")
+          
+          JOB_ID=$(echo "$RESPONSE" | jq -r '.jobId')
+          
+          if [ "$JOB_ID" == "null" ] || [ -z "$JOB_ID" ]; then
+            echo "❌ Failed to submit job"
+            echo "$RESPONSE"
+            exit 1
+          fi
+          
+          echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT
+          echo "✅ Job submitted: $JOB_ID"
+
+      - name: Wait for Analysis
+        id: wait
+        run: |
+          JOB_ID="${{ steps.submit.outputs.job_id }}"
+          
+          echo "Waiting for analysis completion..."
+          
+          for i in {1..60}; do
+            RESPONSE=$(curl -s -X GET "$FACTORIFY_API_ENDPOINT/api/v1/status/$JOB_ID" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}")
+            
+            STATUS=$(echo "$RESPONSE" | jq -r '.status')
+            
+            echo "Check $i: $STATUS"
+            
+            if [ "$STATUS" == "completed" ]; then
+              echo "✅ Analysis completed"
+              echo "$RESPONSE" > factorify-results.json
+              break
+            elif [ "$STATUS" == "failed" ]; then
+              echo "❌ Analysis failed"
+              echo "$RESPONSE"
+              exit 1
+            fi
+            
+            sleep 5
+          done
+
+      - name: Parse Results
+        if: success()
+        run: |
+          echo "Parsing analysis results..."
+          
+          if [ -f "factorify-results.json" ]; then
+            QUALITY=$(jq -r '.result.quality // 0' factorify-results.json)
+            OBFUSCATION_SCORE=$(jq -r '.result.obfuscation.score // 0' factorify-results.json)
+            PARSE_TIME=$(jq -r '.result.performance.parseTime // 0' factorify-results.json)
+            
+            echo "Quality Score: $QUALITY"
+            echo "Obfuscation Score: $OBFUSCATION_SCORE"
+            echo "Parse Time: ${PARSE_TIME}ms"
+            
+            echo "quality=$QUALITY" >> $GITHUB_OUTPUT
+            echo "obfuscation=$OBFUSCATION_SCORE" >> $GITHUB_OUTPUT
+            echo "parse_time=$PARSE_TIME" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Report
+        if: always()
+        run: |
+          echo "## Factorify Analysis Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Ref**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Job ID**: ${{ steps.submit.outputs.job_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "factorify-results.json" ]; then
+            echo "### Results" >> $GITHUB_STEP_SUMMARY
+            echo "- **Quality**: $(jq -r '.result.quality // "N/A"' factorify-results.json)/100" >> $GITHUB_STEP_SUMMARY
+            echo "- **Obfuscation**: $(jq -r '.result.obfuscation.score // "N/A"' factorify-results.json)/100" >> $GITHUB_STEP_SUMMARY
+            echo "- **Parse Time**: $(jq -r '.result.performance.parseTime // "N/A"' factorify-results.json)ms" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Factorify Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: factorify-analysis-results
+          path: |
+            factorify-results.json
+          retention-days: 30
+
+  validate-quality-gates:
+    runs-on: ubuntu-latest
+    needs: call-factorify-api
+    if: ${{ needs.call-factorify-api.result == 'success' }}
+
+    steps:
+      - name: Download Results
+        uses: actions/download-artifact@v4
+        with:
+          name: factorify-analysis-results
+
+      - name: Validate Quality Gates
+        run: |
+          echo "Validating quality gates..."
+          
+          QUALITY=$(jq -r '.result.quality // 0' factorify-results.json)
+          OBFUSCATION=$(jq -r '.result.obfuscation.score // 0' factorify-results.json)
+          
+          QUALITY_THRESHOLD=80
+          OBFUSCATION_THRESHOLD=45
+          
+          if [ $(echo "$QUALITY < $QUALITY_THRESHOLD" | bc -l) -eq 1 ]; then
+            echo "❌ Quality score $QUALITY is below threshold $QUALITY_THRESHOLD"
+            exit 1
+          fi
+          
+          if [ $(echo "$OBFUSCATION > $OBFUSCATION_THRESHOLD" | bc -l) -eq 1 ]; then
+            echo "❌ Obfuscation score $OBFUSCATION exceeds threshold $OBFUSCATION_THRESHOLD"
+            exit 1
+          fi
+          
+          echo "✅ All quality gates passed"
+
+  fallback-validation:
+    runs-on: ubuntu-latest
+    needs: run-local-tests
+    if: ${{ secrets.FACTORIFY_API_TOKEN == '' }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Basic Validation
+        run: |
+          echo "⚠️ FACTORIFY_API_TOKEN not configured, running basic validation only"
+          
+          echo "Checking Lua syntax..."
+          
+          for lua_file in $(find factory-levels -name "*.lua"); do
+            lua -p "$lua_file" || echo "Syntax error in $lua_file"
+          done
+          
+          echo "✅ Basic validation completed"

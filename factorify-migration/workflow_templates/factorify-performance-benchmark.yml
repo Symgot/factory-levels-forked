@@ -1,0 +1,192 @@
+name: Factorify Performance Benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      iterations:
+        description: 'Number of benchmark iterations'
+        required: false
+        default: '100'
+      targets:
+        description: 'Benchmark targets (parse, ml, all)'
+        required: false
+        default: 'all'
+      api_endpoint:
+        description: 'Factorify API endpoint'
+        required: false
+        default: 'https://api.factorify.dev'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.lua'
+
+jobs:
+  performance-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Benchmark Environment
+        run: |
+          echo "Setting up benchmark environment..."
+          sudo apt-get update
+          sudo apt-get install -y bc jq curl
+
+      - name: Parse Performance Benchmark
+        if: ${{ inputs.targets == 'parse' || inputs.targets == 'all' }}
+        id: parse
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          ITERATIONS="${{ inputs.iterations || '100' }}"
+          
+          echo "Running parse performance benchmarks..."
+          
+          TOTAL_MEAN=0
+          FILE_COUNT=0
+          
+          for lua_file in $(find . -name "*.lua" -size +1k | head -10); do
+            CODE=$(cat "$lua_file" | jq -Rs .)
+            
+            RESULT=$(curl -s -X POST "$API_ENDPOINT/api/v1/performance/benchmark" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"code\":$CODE,\"benchmarkType\":\"parse\",\"iterations\":$ITERATIONS}")
+            
+            MEAN=$(echo "$RESULT" | jq -r '.result.mean')
+            P95=$(echo "$RESULT" | jq -r '.result.p95')
+            
+            echo "File: $lua_file"
+            echo "  Mean: ${MEAN}ms"
+            echo "  P95: ${P95}ms"
+            
+            TOTAL_MEAN=$(echo "$TOTAL_MEAN + $MEAN" | bc -l)
+            FILE_COUNT=$((FILE_COUNT + 1))
+          done
+          
+          AVG_MEAN=$(echo "scale=2; $TOTAL_MEAN / $FILE_COUNT" | bc -l)
+          echo "avg_parse_time=$AVG_MEAN" >> $GITHUB_OUTPUT
+          
+          echo "Average parse time: ${AVG_MEAN}ms"
+
+      - name: ML Inference Benchmark
+        if: ${{ inputs.targets == 'ml' || inputs.targets == 'all' }}
+        id: ml
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          
+          echo "Running ML inference benchmarks..."
+          
+          MAIN_LUA=$(find . -name "control.lua" | head -1)
+          
+          if [ -n "$MAIN_LUA" ]; then
+            CODE=$(cat "$MAIN_LUA" | jq -Rs .)
+            
+            START_TIME=$(date +%s%3N)
+            
+            for i in {1..10}; do
+              curl -s -X POST "$API_ENDPOINT/api/v1/ml/predict" \
+                -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+                -H "Content-Type: application/json" \
+                -d "{\"code\":$CODE,\"modelType\":\"pattern_recognition\"}" \
+                > /dev/null
+            done
+            
+            END_TIME=$(date +%s%3N)
+            TOTAL_TIME=$((END_TIME - START_TIME))
+            AVG_TIME=$((TOTAL_TIME / 10))
+            
+            echo "ml_inference_time=$AVG_TIME" >> $GITHUB_OUTPUT
+            echo "Average ML inference time: ${AVG_TIME}ms"
+          fi
+
+      - name: Memory Usage Analysis
+        run: |
+          echo "Analyzing memory usage..."
+          
+          free -m
+          df -h
+
+      - name: Compare with Baseline
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Comparing with baseline performance..."
+          
+          BASELINE_PARSE=18
+          CURRENT_PARSE="${{ steps.parse.outputs.avg_parse_time }}"
+          
+          if [ -n "$CURRENT_PARSE" ]; then
+            DIFF=$(echo "$CURRENT_PARSE - $BASELINE_PARSE" | bc -l)
+            PERCENT=$(echo "scale=2; ($DIFF / $BASELINE_PARSE) * 100" | bc -l)
+            
+            echo "Performance delta: ${PERCENT}%"
+            
+            if [ $(echo "$PERCENT > 10" | bc -l) -eq 1 ]; then
+              echo "⚠️ Performance regression detected: ${PERCENT}% slower than baseline"
+            else
+              echo "✅ Performance within acceptable range"
+            fi
+          fi
+
+      - name: Cache Hit Rate Analysis
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          
+          echo "Analyzing cache effectiveness..."
+          
+          HEALTH=$(curl -s -X GET "$API_ENDPOINT/api/v1/health" \
+            -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}")
+          
+          echo "$HEALTH" | jq '.services'
+
+      - name: Generate Performance Report
+        if: always()
+        run: |
+          echo "## Factorify Performance Benchmark Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Iterations**: ${{ inputs.iterations || '100' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Targets**: ${{ inputs.targets || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -n "${{ steps.parse.outputs.avg_parse_time }}" ]; then
+            echo "**Parse Performance**:" >> $GITHUB_STEP_SUMMARY
+            echo "- Average: ${{ steps.parse.outputs.avg_parse_time }}ms" >> $GITHUB_STEP_SUMMARY
+            echo "- Target: <20ms" >> $GITHUB_STEP_SUMMARY
+            
+            if [ $(echo "${{ steps.parse.outputs.avg_parse_time }} < 20" | bc -l) -eq 1 ]; then
+              echo "- Status: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- Status: ⚠️ Above target" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -n "${{ steps.ml.outputs.ml_inference_time }}" ]; then
+            echo "**ML Inference Performance**:" >> $GITHUB_STEP_SUMMARY
+            echo "- Average: ${{ steps.ml.outputs.ml_inference_time }}ms" >> $GITHUB_STEP_SUMMARY
+            echo "- Target: <50ms" >> $GITHUB_STEP_SUMMARY
+            
+            if [ $(echo "${{ steps.ml.outputs.ml_inference_time }} < 50" | bc -l) -eq 1 ]; then
+              echo "- Status: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- Status: ⚠️ Above target" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: factorify-performance-results
+          path: |
+            *.json
+            *.log
+          retention-days: 7

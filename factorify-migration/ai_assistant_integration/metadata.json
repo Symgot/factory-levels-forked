@@ -1,0 +1,263 @@
+{
+  "api_version": "1.0.0",
+  "last_updated": "2024-11-07T10:30:00Z",
+  "description": "Factorify API metadata for AI-assisted development",
+  "base_url": "https://api.factorify.dev",
+  
+  "endpoints": {
+    "analyze_mod": {
+      "method": "POST",
+      "path": "/api/v1/analyze/mod",
+      "description": "Submit a Factorio mod for comprehensive analysis",
+      "auth_required": true,
+      "example_code": {
+        "curl": "curl -X POST https://api.factorify.dev/api/v1/analyze/mod -H 'Authorization: Bearer $TOKEN' -H 'Content-Type: application/json' -d '{\"repository\":\"user/mod\",\"type\":\"full\"}'",
+        "javascript": "const response = await fetch('https://api.factorify.dev/api/v1/analyze/mod', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ repository: 'user/mod', type: 'full' }) });",
+        "python": "response = requests.post('https://api.factorify.dev/api/v1/analyze/mod', headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}, json={'repository': 'user/mod', 'type': 'full'})"
+      }
+    },
+    "ml_predict": {
+      "method": "POST",
+      "path": "/api/v1/ml/predict",
+      "description": "Run ML pattern recognition on Lua code",
+      "auth_required": true,
+      "example_code": {
+        "curl": "curl -X POST https://api.factorify.dev/api/v1/ml/predict -H 'Authorization: Bearer $TOKEN' -d '{\"code\":\"local x = 1\",\"modelType\":\"pattern_recognition\"}'",
+        "javascript": "const result = await factorifyClient.mlPredict({ code: 'local x = 1', modelType: 'pattern_recognition' });",
+        "python": "result = client.ml_predict(code='local x = 1', model_type='pattern_recognition')"
+      }
+    },
+    "performance_benchmark": {
+      "method": "POST",
+      "path": "/api/v1/performance/benchmark",
+      "description": "Benchmark performance of Lua code",
+      "auth_required": true,
+      "example_code": {
+        "curl": "curl -X POST https://api.factorify.dev/api/v1/performance/benchmark -H 'Authorization: Bearer $TOKEN' -d '{\"code\":\"local x = 1\",\"iterations\":100}'",
+        "javascript": "const result = await factorifyClient.benchmark({ code: 'local x = 1', iterations: 100 });",
+        "python": "result = client.benchmark(code='local x = 1', iterations=100)"
+      }
+    }
+  },
+  
+  "common_patterns": {
+    "entity_creation": {
+      "description": "Creating entities in Factorio",
+      "lua_example": "local entity = surface.create_entity{name='assembling-machine-1', position={0, 0}, force=game.forces.player}",
+      "ml_class": "entity_manipulation",
+      "typical_confidence": 0.92
+    },
+    "recipe_handling": {
+      "description": "Recipe and crafting logic",
+      "lua_example": "data:extend({{ type = 'recipe', name = 'my-recipe', ingredients = {{'iron-plate', 2}}, result = 'my-item' }})",
+      "ml_class": "recipe_handling",
+      "typical_confidence": 0.88
+    },
+    "event_handling": {
+      "description": "Registering event handlers",
+      "lua_example": "script.on_event(defines.events.on_built_entity, function(event) end)",
+      "ml_class": "event_handling",
+      "typical_confidence": 0.95
+    },
+    "prototype_definition": {
+      "description": "Defining prototypes",
+      "lua_example": "data:extend({{ type = 'item', name = 'my-item', icon = '__mod__/graphics/item.png', stack_size = 50 }})",
+      "ml_class": "prototype_definition",
+      "typical_confidence": 0.90
+    }
+  },
+  
+  "factorio_api_coverage": {
+    "runtime_api": {
+      "version": "2.0.72+",
+      "classes_supported": [
+        "LuaSurface",
+        "LuaEntity",
+        "LuaForce",
+        "LuaPlayer",
+        "LuaInventory",
+        "LuaItemStack",
+        "LuaControl",
+        "LuaGameScript"
+      ],
+      "events_supported": [
+        "on_built_entity",
+        "on_player_crafted_item",
+        "on_chunk_generated",
+        "on_research_finished",
+        "on_tick"
+      ]
+    },
+    "prototype_api": {
+      "types_supported": [
+        "item",
+        "recipe",
+        "entity",
+        "technology",
+        "fluid",
+        "virtual-signal"
+      ]
+    }
+  },
+  
+  "code_examples": {
+    "github_actions_integration": {
+      "file": "examples/github_actions_integration.yml",
+      "description": "Complete GitHub Actions workflow using Factorify API",
+      "content": "name: Factorify Validation\non:\n  push:\n    branches: [main]\njobs:\n  validate:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: Analyze\n        run: |\n          curl -X POST ${{ secrets.FACTORIFY_API_ENDPOINT }}/api/v1/analyze/mod \\\n            -H 'Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}' \\\n            -d '{\"repository\":\"${{ github.repository }}\"}'"
+    },
+    "nodejs_client": {
+      "file": "examples/nodejs_client.js",
+      "description": "Node.js client for Factorify API",
+      "content": "const FactorifyClient = require('@factorify/client');\nconst client = new FactorifyClient({ apiToken: process.env.FACTORIFY_API_TOKEN });\nconst result = await client.analyzeMod({ repository: 'user/mod' });"
+    },
+    "python_client": {
+      "file": "examples/python_client.py",
+      "description": "Python client for Factorify API",
+      "content": "from factorify import FactorifyClient\nclient = FactorifyClient(api_token=os.getenv('FACTORIFY_API_TOKEN'))\nresult = client.analyze_mod(repository='user/mod')"
+    }
+  },
+  
+  "ml_models": {
+    "pattern_recognition": {
+      "architecture": "10-class neural network",
+      "input_size": 256,
+      "classes": [
+        "entity_manipulation",
+        "recipe_handling",
+        "prototype_definition",
+        "event_handling",
+        "data_processing",
+        "ui_interaction",
+        "multiplayer_sync",
+        "optimization",
+        "modding_api",
+        "utility_functions"
+      ],
+      "typical_inference_time_ms": 42,
+      "accuracy": 0.94
+    },
+    "anomaly_detection": {
+      "architecture": "Autoencoder",
+      "threshold": 0.7,
+      "typical_inference_time_ms": 38
+    },
+    "quality_prediction": {
+      "architecture": "Regression model",
+      "output_range": [0, 100],
+      "typical_inference_time_ms": 35
+    }
+  },
+  
+  "performance_targets": {
+    "api_response_time_ms": 5000,
+    "parse_time_ms": 20,
+    "ml_inference_ms": 50,
+    "cache_hit_rate": 0.85,
+    "uptime": 0.999
+  },
+  
+  "rate_limits": {
+    "free": {
+      "requests_per_hour": 1000,
+      "requests_per_minute": 50,
+      "concurrent_requests": 5
+    },
+    "standard": {
+      "requests_per_hour": 5000,
+      "requests_per_minute": 100,
+      "concurrent_requests": 20
+    },
+    "enterprise": {
+      "requests_per_hour": 10000,
+      "requests_per_minute": 200,
+      "concurrent_requests": 50
+    }
+  },
+  
+  "common_errors": {
+    "MISSING_AUTH": {
+      "code": 401,
+      "message": "Missing or invalid authorization header",
+      "solution": "Add 'Authorization: Bearer YOUR_TOKEN' header"
+    },
+    "RATE_LIMIT_EXCEEDED": {
+      "code": 429,
+      "message": "Rate limit exceeded",
+      "solution": "Wait for Retry-After seconds and retry"
+    },
+    "MISSING_SOURCE": {
+      "code": 400,
+      "message": "Repository or URL not provided",
+      "solution": "Provide either 'repository' or 'url' in request body"
+    }
+  },
+  
+  "integration_guides": {
+    "github_actions": {
+      "title": "GitHub Actions Integration",
+      "steps": [
+        "Add FACTORIFY_API_TOKEN secret to repository",
+        "Create .github/workflows/factorify.yml",
+        "Use Factorify reusable workflows",
+        "Trigger on push or pull_request events"
+      ],
+      "example_file": "examples/github_actions_integration.yml"
+    },
+    "cli_tool": {
+      "title": "CLI Tool Integration",
+      "steps": [
+        "Install factorify-cli: npm install -g factorify-cli",
+        "Configure token: factorify config set token YOUR_TOKEN",
+        "Analyze mod: factorify analyze path/to/mod",
+        "View results: factorify status JOB_ID"
+      ]
+    }
+  },
+  
+  "troubleshooting": {
+    "high_latency": {
+      "symptom": "API responses taking >5 seconds",
+      "causes": [
+        "Large mod files (>100KB)",
+        "Network latency",
+        "High load on API"
+      ],
+      "solutions": [
+        "Use caching",
+        "Reduce analysis scope",
+        "Contact support for dedicated instance"
+      ]
+    },
+    "authentication_failed": {
+      "symptom": "401 Unauthorized error",
+      "causes": [
+        "Invalid or expired token",
+        "Missing authorization header",
+        "Token not configured in secrets"
+      ],
+      "solutions": [
+        "Regenerate API token",
+        "Check Authorization header format",
+        "Verify FACTORIFY_API_TOKEN secret"
+      ]
+    }
+  },
+  
+  "best_practices": {
+    "api_usage": [
+      "Cache analysis results for 24 hours",
+      "Use batch analysis for multiple files",
+      "Set appropriate priority based on urgency",
+      "Monitor rate limit headers",
+      "Implement exponential backoff for retries"
+    ],
+    "mod_development": [
+      "Run analysis on every commit",
+      "Set quality gates in CI/CD",
+      "Monitor obfuscation scores",
+      "Keep parse times under 20ms",
+      "Use ML predictions for code reviews"
+    ]
+  }
+}

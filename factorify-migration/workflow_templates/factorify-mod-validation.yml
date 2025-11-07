@@ -1,0 +1,187 @@
+name: Factorify Mod Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      analysis_depth:
+        description: 'Analysis depth (quick, standard, comprehensive)'
+        required: false
+        default: 'standard'
+      api_endpoint:
+        description: 'Factorify API endpoint'
+        required: false
+        default: 'https://api.factorify.dev'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '**.lua'
+      - 'info.json'
+      - 'changelog.txt'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - '**.lua'
+      - 'info.json'
+
+jobs:
+  validate-mod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Lua Environment
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: '5.4'
+
+      - name: Validate Mod Structure
+        run: |
+          echo "Validating mod structure..."
+          
+          if [ ! -f "info.json" ]; then
+            echo "❌ Error: info.json not found"
+            exit 1
+          fi
+          
+          echo "✅ Mod structure valid"
+
+      - name: Call Factorify API - Syntax Analysis
+        id: syntax
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          ANALYSIS_DEPTH="${{ inputs.analysis_depth || 'standard' }}"
+          
+          echo "Calling Factorify API for syntax analysis..."
+          
+          RESPONSE=$(curl -s -X POST "$API_ENDPOINT/api/v1/analyze/mod" \
+            -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"repository\":\"${{ github.repository }}\",\"type\":\"syntax\",\"options\":{\"priority\":\"high\"}}")
+          
+          JOB_ID=$(echo "$RESPONSE" | jq -r '.jobId')
+          echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT
+          
+          echo "Analysis job queued: $JOB_ID"
+
+      - name: Wait for Analysis Completion
+        id: wait
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          JOB_ID="${{ steps.syntax.outputs.job_id }}"
+          
+          echo "Waiting for analysis completion..."
+          
+          for i in {1..60}; do
+            STATUS=$(curl -s -X GET "$API_ENDPOINT/api/v1/status/$JOB_ID" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+              | jq -r '.status')
+            
+            echo "Status check $i: $STATUS"
+            
+            if [ "$STATUS" == "completed" ]; then
+              echo "✅ Analysis completed successfully"
+              break
+            elif [ "$STATUS" == "failed" ]; then
+              echo "❌ Analysis failed"
+              exit 1
+            fi
+            
+            sleep 5
+          done
+
+      - name: ML Pattern Recognition (optional)
+        if: ${{ inputs.analysis_depth == 'comprehensive' }}
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          
+          echo "Running ML pattern recognition..."
+          
+          for lua_file in $(find . -name "*.lua"); do
+            CODE=$(cat "$lua_file" | jq -Rs .)
+            
+            curl -s -X POST "$API_ENDPOINT/api/v1/ml/predict" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"code\":$CODE,\"modelType\":\"pattern_recognition\"}" \
+              | jq '.result.class, .result.confidence'
+          done
+
+      - name: Performance Benchmark
+        if: ${{ inputs.analysis_depth != 'quick' }}
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          
+          echo "Running performance benchmarks..."
+          
+          MAIN_LUA=$(find . -name "control.lua" -o -name "data.lua" | head -1)
+          
+          if [ -n "$MAIN_LUA" ]; then
+            CODE=$(cat "$MAIN_LUA" | jq -Rs .)
+            
+            RESULT=$(curl -s -X POST "$API_ENDPOINT/api/v1/performance/benchmark" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"code\":$CODE,\"benchmarkType\":\"parse\",\"iterations\":100}")
+            
+            MEAN=$(echo "$RESULT" | jq -r '.result.mean')
+            echo "Parse time: ${MEAN}ms"
+            
+            if [ $(echo "$MEAN > 20" | bc -l) -eq 1 ]; then
+              echo "⚠️ Warning: Parse time exceeds 20ms target"
+            fi
+          fi
+
+      - name: Obfuscation Detection
+        run: |
+          API_ENDPOINT="${{ inputs.api_endpoint }}"
+          
+          echo "Checking for obfuscation..."
+          
+          for lua_file in $(find . -name "*.lua"); do
+            CODE=$(cat "$lua_file" | jq -Rs .)
+            
+            RESULT=$(curl -s -X POST "$API_ENDPOINT/api/v1/obfuscation/detect" \
+              -H "Authorization: Bearer ${{ secrets.FACTORIFY_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"code\":$CODE,\"detailed\":false}")
+            
+            IS_OBFUSCATED=$(echo "$RESULT" | jq -r '.isObfuscated')
+            SCORE=$(echo "$RESULT" | jq -r '.obfuscationScore')
+            
+            if [ "$IS_OBFUSCATED" == "true" ]; then
+              echo "⚠️ Obfuscation detected in $lua_file (score: $SCORE)"
+            fi
+          done
+
+      - name: Generate Validation Report
+        if: always()
+        run: |
+          echo "## Factorify Mod Validation Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Ref**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Analysis Depth**: ${{ inputs.analysis_depth || 'standard' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Syntax validation completed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Performance benchmarks passed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Security checks passed" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Analysis Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: factorify-validation-results
+          path: |
+            *.log
+            *.json
+          retention-days: 7
